@@ -113,6 +113,26 @@ class ProfileTab extends StatelessWidget {
                       ),
                     ],
                   ),
+                  // Version info (below FCM token)
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return const SizedBox.shrink();
+                      final info = snapshot.data!;
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'v${info.version} (${info.buildNumber})',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.primaryLight,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 12),
 
                   // Daily reading goal (right below name)
@@ -230,26 +250,6 @@ class ProfileTab extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
-                  // Version info
-                  FutureBuilder<PackageInfo>(
-                    future: PackageInfo.fromPlatform(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const SizedBox.shrink();
-                      final info = snapshot.data!;
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'v${info.version} (${info.buildNumber})',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
                   ),
                   const SizedBox(height: 24),
                 ],
