@@ -46,6 +46,47 @@ Her oturumda otomatik okunur. Güncel tut.
 - main'e merge etme, main'e push etme, force push yapma YETKİSİ YOKTUR.
 - PR açtıktan sonra kullanıcıya PR linkini verir ve durur.
 
+### PR Sonrası Slack Bildirimi (ZORUNLU)
+
+PR oluşturulduktan sonra **her zaman** Slack'e bildirim gönderilmelidir.
+Bu kural tüm Claude Code instance'ları (mobil, masaüstü, web) için geçerlidir.
+
+**Script:** `scripts/notify_slack_pr.sh`
+
+**PR oluşturduktan sonra çalıştır:**
+```bash
+./scripts/notify_slack_pr.sh "<pr_url>" "<branch_name>" "<pr_title>" "<özet>"
+```
+
+**Parametreler:**
+- `pr_url` — `gh pr create` çıktısından alınan PR linki
+- `branch_name` — oluşturulan branch adı
+- `pr_title` — PR başlığı
+- `özet` — Yapılan değişikliklerin kısa Türkçe özeti (2-4 cümle)
+  Neyin değiştiğini, hangi dosyaların etkilendiğini ve neden yapıldığını içermeli.
+
+**Tam akış örneği:**
+```bash
+# 1. Branch oluştur
+git checkout -b feature/focus-timer-fix
+
+# 2. Değişiklikler yap, commit et, push et
+git add ... && git commit -m "..."
+git push -u origin feature/focus-timer-fix
+
+# 3. PR oluştur
+PR_URL=$(gh pr create --base main --title "Fix focus timer bug" --body "..." 2>&1 | tail -1)
+
+# 4. Slack bildirimi gönder (ZORUNLU)
+./scripts/notify_slack_pr.sh "$PR_URL" "feature/focus-timer-fix" "Fix focus timer bug" "Focus timer sıfırlanma hatası düzeltildi. FocusCubit'teki timer reset logic güncellendi. Etkilenen: focus_cubit.dart, focus_state.dart"
+```
+
+**Webhook URL:** `.slack_webhook` dosyasından okunur (gitignore'da, repo'ya dahil değil).
+Firestore'daki `system/systemInfos.slacInfoURL` alanındaki URL bu dosyaya yazılmalıdır.
+
+> Script bulamazsa veya webhook URL yoksa hata verir ama PR oluşturma işlemi etkilenmez.
+> Slack bildirimi gönderilemezse kullanıcıya bildir.
+
 ---
 
 ## Proje Kimliği

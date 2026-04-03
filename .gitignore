@@ -93,5 +93,8 @@ app.*.map.json
 migrate_working_dir/
 .atom/
 
+# --- Slack webhook ---
+.slack_webhook
+
 # --- Claude Code local settings ---
 .claude/settings.local.json

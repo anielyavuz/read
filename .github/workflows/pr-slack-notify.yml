@@ -1,0 +1,93 @@
+name: PR Slack Notification
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack Notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Truncate body to 500 chars for Slack
+          BODY_SHORT=$(echo "$PR_BODY" | head -c 500)
+
+          # Extract summary section if exists
+          SUMMARY=$(echo "$PR_BODY" | sed -n '/## Summary/,/## /p' | head -20 | tail -n +2)
+          if [ -z "$SUMMARY" ]; then
+            SUMMARY="$BODY_SHORT"
+          fi
+
+          # Clean special chars for JSON
+          SUMMARY=$(echo "$SUMMARY" | sed 's/"/\\"/g' | tr '\n' ' ' | head -c 400)
+          PR_TITLE_CLEAN=$(echo "$PR_TITLE" | sed 's/"/\\"/g')
+
+          curl -s -X POST \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"blocks\": [
+                {
+                  \"type\": \"header\",
+                  \"text\": {
+                    \"type\": \"plain_text\",
+                    \"text\": \"📱 Bookpulse — New PR #${PR_NUMBER}\",
+                    \"emoji\": true
+                  }
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*Title:*\n${PR_TITLE_CLEAN}\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*Branch:*\n\`${PR_BRANCH}\`\"
+                    }
+                  ]
+                },
+                {
+                  \"type\": \"section\",
+                  \"fields\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*Author:*\n${PR_AUTHOR}\"
+                    },
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"*Link:*\n<${PR_URL}|View PR>\"
+                    }
+                  ]
+                },
+                {
+                  \"type\": \"section\",
+                  \"text\": {
+                    \"type\": \"mrkdwn\",
+                    \"text\": \"*Summary:*\n${SUMMARY}\"
+                  }
+                },
+                {
+                  \"type\": \"divider\"
+                },
+                {
+                  \"type\": \"context\",
+                  \"elements\": [
+                    {
+                      \"type\": \"mrkdwn\",
+                      \"text\": \"📖 Bookpulse | PC'den test et → onaylarsan merge et\"
+                    }
+                  ]
+                }
+              ]
+            }" \
+            "$SLACK_WEBHOOK_URL"
