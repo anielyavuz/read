@@ -244,7 +244,7 @@ class ProfileTab extends StatelessWidget {
                             'v${info.version} (${info.buildNumber})',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: AppColors.textMuted,
+                              color: AppColors.primaryLight,
                             ),
                           ),
                         ),
