@@ -1,0 +1,301 @@
+# Bookpulse — Geliştirme Yol Haritası
+# Claude Code bu dosyayı görev takibi için kullanır.
+# Tamamlanan görevlere [x], devam edenlere [~], bekleyenlere [ ] işareti koy.
+
+===========================================================================
+FAZ 1 — MVP (Ay 1-3)
+Hedef: 100 paying user · %40+ D30 retention · App Store 4.3+
+===========================================================================
+
+--- ALTYAPI ---
+[x] Firebase projesi oluştur (prod + dev environment ayrı)
+[x] Flutter projesi scaffold (flutter_bloc, go_router, get_it)
+[ ] Firestore rules yazılır (users, userBooks, leagues)
+[ ] CI/CD: GitHub Actions → TestFlight / Play Internal Track
+[ ] .env yapısı ve secrets yönetimi
+[ ] Crashlytics + Firebase Analytics entegrasyonu
+
+--- AUTH ---
+[x] Email/password kayıt + giriş
+[x] Apple Sign In (iOS zorunlu)
+[x] Google Sign In
+[x] Onboarding flow (köpek seçimi + isim, okuma hedefi, tür tercihleri, okuma zamanı)
+[x] Profil sayfası (çıkış yap, hesap silme — re-auth destekli)
+
+--- KİTAP TAKİBİ ---
+[x] Google Books API entegrasyonu
+[ ] ISBN barkod tarama (mobile_scanner paketi)
+[x] Kitap arama + ekleme
+[x] Okuma durumu: Okuyorum / Bitti / Okuyacağım (geri alma destekli)
+[x] Sayfa takibi (mevcut sayfa girişi)
+[ ] Okuma timer (arka planda çalışır, sayfa/dakika hesaplar)
+[ ] Goodreads CSV import
+
+--- UI/UX ---
+[x] Bottom navigation shell (Home, Library, Focus, Profile)
+[x] Home tab (puppy companion + günlük ilerleme + hızlı aksiyonlar)
+[x] Library tab (3 sekme: Okuyor/Bitti/Okunacak)
+[x] Kitap detay ekranı (ilerleme güncelleme, bitirme onayı, HTML temizleme)
+[x] Kitap arama ekranı (Google Books)
+[x] Focus & Profile placeholder tab'ları
+[x] Çoklu dil desteği (EN + TR) — tüm ekranlar
+
+--- GAMİFİCATİON ---
+[x] XP sistemi (sayfa, timer, kitap bitirme, streak)
+[ ] Günlük streak hesaplama (UTC gece yarısı Cloud Function)
+[ ] Streak "kırılma" bildirimi (FCM push — 2 saat önce uyarı)
+[ ] Rozet sistemi (paylaşılabilir BookTok-ready PNG kartları):
+    - First Page, Bookworm (10 kitap), Century Club (100 kitap)
+    - Speed Reader (3 günde kitap), Genre Explorer (5 farklı tür)
+    - Night Owl (gece 10x), Early Bird (sabah 10x)
+    - On Fire (7 gün), Unstoppable (30 gün), Legend (100 gün), Immortal (365 gün)
+    - ReadBrain Certified (quiz %70+), Diamond League, Garden Master (50 focus seans)
+[ ] Sürpriz ödül mekanığı ("Bugün 100 sayfa okudun — bonus 50 XP!")
+[ ] XP geçmişi ekranı
+
+--- SUBSCRIPTION ---
+[ ] RevenueCat entegrasyonu (iOS + Android)
+[ ] Product ID'ler tanımla (reader_monthly, reader_yearly, bookworm_monthly, bookworm_yearly)
+[ ] 14 günlük trial flow
+[ ] Hard paywall ekranı (trial bitince)
+[ ] Restore purchases
+[ ] Subscription durumu Firestore'a yaz (webhook via Cloud Function)
+
+--- FOCUS MODE ---
+[x] Focus Mode ekranı (timer UI — Pomodoro + Free Timer + Hedefli mod)
+[x] Puppy care reward sistemi (snack/walk/play/feast — süreye göre)
+[x] Puppy Diary ekranı (haftalık 7 günlük grid + istatistikler)
+[x] Focus seans XP hesaplama (+15/+30/+50 XP süreye göre)
+[x] Focus seans Firestore kaydetme (focusSessions collection)
+[ ] Puppy animasyonu: focus seans sırasında puppy okuma pozu
+[ ] Seanstan çıkınca puppy üzülme animasyonu (30 sn tolerans)
+
+--- PUSH BİLDİRİMLER & OKUMA SAATİ ---
+[x] FCM token kaydetme (kullanıcı başına)
+[ ] Okuma saati ayarlama ekranı (hafta içi / hafta sonu ayrı)
+[ ] Süre hedefi seçimi (15 / 30 / 45 / 60 dakika)
+[ ] Okuma saati hatırlatma bildirimi (10 dk önce)
+[ ] Streak risk uyarısı bildirimi (gece 20:00)
+[ ] İlerleme bazlı akıllı bildirim ("23 sayfa kaldı!")
+[ ] Haftalık özet bildirimi (Pazar akşamı)
+[ ] Sessiz saat ayarı (23:00-07:00 arası bildirim yok)
+[ ] Günde max 2 bildirim sınırı (spam önleme)
+[ ] Akıllı zamanlama: 2 hafta sonra gerçek kullanım verisine göre saat önerisi
+[ ] Bildirim tercihleri Firestore kaydetme
+
+--- APP STORE ---
+[ ] App Store Connect hesabı + uygulama kaydı
+[ ] Play Console hesabı + uygulama kaydı
+[ ] TestFlight beta test (10 kullanıcı)
+[ ] App Store screenshots + metadata (EN)
+[ ] LAUNCH: App Store + Google Play
+
+===========================================================================
+FAZ 2 — Sosyal & Rekabet (Ay 4-6)
+Hedef: 500 paying user · %60+ haftalık aktif · %15 davet oranı
+===========================================================================
+
+--- LEAGUE SİSTEMİ ---
+[ ] Günlük ve Haftalık lig mantığı (Cloud Function — pazartesi sıfırlama)
+[ ] League matchmaking (30 kişilik grup oluşturma)
+[ ] Liderboard ekranı (gerçek zamanlı Firestore listener)
+[ ] Terfi / düşüş animasyonu (Faz sonu pazartesi sabahı)
+[ ] League bildirim: haftanın başı, son 24 saat, sonuç
+[ ] 5 lig seviyesi: Bronze, Silver, Gold, Platinum, Diamond
+[ ] Diamond lig: düşüş yok, özel rozet
+
+--- CHALLENGE SİSTEMİ ---
+[ ] Challenge veri modeli (Firestore: challenges collection)
+[ ] Challenge oluşturma ekranı (Bookworm plan)
+[ ] Challenge keşfet ekranı (public challenge listesi)
+[ ] Challenge detay ekranı (katılımcılar, sıralama, ilerleme)
+[ ] Read-Along challenge: aynı kitabı birlikte okuma
+[ ] Sprint challenge: "Bu hafta en çok sayfa kim okur?"
+[ ] Genre challenge: "Bu ay X türde Y kitap bitir"
+[ ] Pages Goal challenge: "30 günde 1000 sayfa oku"
+[ ] Challenge sıralama & XP ödülleri (+50 katılım, +150 tamamlama, +300 Top 3)
+[ ] Challenge bildirim: sıra değişikliği, bitiş yaklaşıyor, sonuç
+[ ] Cloud Function: challenge sonuç hesaplama
+[ ] Free: max 1 aktif challenge, Reader: max 3, Bookworm: sınırsız + oluşturma
+
+--- PAİGE PUPPY MASKOT (v1) ---
+[x] 11 köpek ırkı karakter tasarımı (Golden Retriever, Corgi, Shiba Inu, Poodle, Dalmatian, Siberian Husky, German Shepherd, Rottweiler, Border Collie, Kangal, Saint Bernard)
+[ ] 5 büyüme seviyesi görselleri (Tiny Pup → Playful Pup → Growing Dog → Handsome Dog → Majestic Dog)
+[x] Onboarding'de ırk seçimi + isim verme ekranı
+[ ] Paige widget'ı (ana ekranda küçük puppy companion)
+[ ] Yavaş büyüme sistemi: her 500 XP = 1 seviye (Lv 1-50, ~6 ay max)
+[ ] Bakım durumu sistemi (okuma aktivitesine göre):
+    - Düzenli: parlak tüy, mutlu animasyon
+    - 1-2 gün ara: küskün bakış, kulaklar düşük
+    - 3-4 gün ara: trip atar, sırtını döner, yan bakış
+    - 5+ gün ara: battaniyeye sarılıp dramatik uyuma
+[ ] Geri dönüş sevinç animasyonları (ara süresine göre kademeli)
+[ ] Uygulama açılış selamlaması (günün saatine göre — sabah esner, akşam uyuşuk)
+[ ] Streak kutlama animasyonu (kemik yakalar, dönerek zıplar)
+[ ] Kitap bitirildiğinde kitapla oynama animasyonu + yorum
+
+--- CO-READİNG (Focus Mode Sosyal) ---
+[ ] Co-Reading seans oluşturma (arkadaş davet)
+[ ] Gerçek zamanlı seans durumu (Firestore listener)
+[ ] Biri çıkarsa herkesin bitkisi solar mekanığı
+[ ] Co-Reading x2 XP bonusu
+
+--- ARKADAŞ SİSTEMİ ---
+[ ] Kullanıcı adı ile arkadaş arama
+[ ] Takip et / takipten çık
+[ ] Aktivite akışı (arkadaşların okuduğu kitaplar, kazandığı rozetler)
+[ ] "Zorla" özelliği (arkadaşa bildirim gönder — günlük 1 hak)
+
+--- PAYLAŞIM ---
+[ ] League sonu paylaşım kartı (PNG oluşturma — fl_chart / screenshot)
+[ ] "Bu haftaki sıralamam" kartı
+[ ] Günlük Strike paylaşımı kartı PNG
+[ ] Kitap bitiş kartı ("X kitabı Y günde okudum")
+[ ] Rozet kazanım paylaşım kartı (BookTok/Instagram Story formatı)
+[ ] Challenge sonuç paylaşım kartı
+[ ] Paige ile birlikte paylaşım kartları (maskot görünür)
+[ ] Share sheet entegrasyonu (native iOS/Android)
+
+--- READBRAIN v1 ---
+[ ] Top 500 kitap için curated soru havuzu JSON oluştur
+[ ] Quiz UI (çoktan seçmeli, 5 soru, geri sayım)
+[ ] Gemini 2.5 Flash entegrasyonu (havuzda olmayan kitaplar)
+[ ] Quiz sonuç ekranı (skor, açıklamalar, XP kazanımı)
+[ ] "ReadBrain Certified" rozeti
+[ ] Quiz kilidi: 3 deneme → 24 saat bekleme
+
+--- SOSYAL EKRANLAR ---
+[ ] Global liderboard (ülke bazlı filtreleme)
+[ ] Arkadaş liderboard'u
+[ ] Profil sayfası (public — kitaplar, rozetler, istatistikler)
+
+===========================================================================
+FAZ 3 — Growth & Monetizasyon (Ay 7-9)
+Hedef: 2.000 paying user · MRR $10K+ · Organic install %50+
+===========================================================================
+
+--- SUBSCRIPTION GENİŞLETME ---
+[ ] Fiyat A/B testi (RevenueCat experiments)
+[ ] Yıllık plan öne çıkarma (paywall redesign)
+[ ] Streak Freeze item'ı (Bookworm plan dahil)
+[ ] Hediye abonelik (gift card kodu sistemi)
+
+--- GROWTH ---
+[ ] Referral programı: "Arkadaşını davet et → 1 ay ücretsiz"
+[ ] Unique referral kodu (kullanıcı başına)
+[ ] ASO optimizasyonu: anahtar kelime araştırması, screenshot A/B testi
+[ ] App Store rating prompt (5. kitap bitirilince, non-intrusive)
+[ ] BookTok influencer affiliate sistemi (UTM link tracking)
+
+--- READBRAIN v2 ---
+[ ] Zorluk adaptasyon algoritması (kullanıcı geçmişine göre)
+[ ] Soru havuzu genişletme (top 1000 kitap)
+[ ] "Brain League" modu (quiz puanlarına dayalı ayrı rekabet)
+[ ] Geçmiş quiz sonuçları ve ilerleme grafiği
+
+--- PAİGE PUPPY MASKOT (v2) ---
+[ ] Kişilik gelişimi: okunan türlere göre puppy davranış değişimi
+    (romantik→kalp gözler, polisiye→dedektif şapka, sci-fi→uzay gözlüğü)
+[ ] Kıyafet & aksesuar sistemi (tasma, bandana, gözlük, şapka, pelerin)
+[ ] Irka özel aksesuarlar (Corgi taç, Husky kış atkısı, Kangal zırh vb.)
+[ ] Sezonluk kostümler (Noel kazağı, Halloween kostümü, yaz şapkası)
+[ ] Bookworm plan: premium kostümler + rare ırk renk varyasyonları
+[ ] Puppy tür bazlı dinamik tepkiler ve yorumlar
+[ ] Irk değiştirme özelliği (ayarlardan, seviye korunur)
+
+--- FOCUS MODE (v2) ---
+[ ] Double XP Day: haftada rastgele 1 gün sürpriz x2 XP
+[ ] Puppy Diary istatistikleri (toplam aktivite, en uzun seans, favori saat)
+[ ] Puppy Diary paylaşım kartı (haftalık bakım görünümü PNG)
+[ ] Ambient sesler (yağmur, şömine, kafe — okuma atmosferi)
+
+--- AKILLI BİLDİRİM (v2) ---
+[ ] Push bildirim A/B testi (metin, saat optimizasyonu)
+[ ] Bildirim kişiselleştirme: Paige'in kişiliğine uygun metin
+[ ] Challenge bildirim: arkadaş seni geçti uyarısı
+
+--- ANALİTİK & RETENTION ---
+[ ] Churn risk tespiti (3+ gün okumayan → özel bildirim)
+[ ] "Neden bıraktın?" çıkış anketi (subscription iptal akışı)
+[ ] Cohort analizi dashboard'u (internal — Firebase + Sheets export)
+[ ] Push bildirim A/B testi (metin, saat optimizasyonu)
+
+--- TEKNİK BORÇ ---
+[ ] Performance audit (Firestore okuma sayısı optimizasyonu)
+[ ] Offline mod geliştirme (uzun süre internetsiz kullanım)
+[ ] Firestore pagination (büyük koleksiyonlar için)
+[ ] Widget test coverage %70'e çıkar
+
+===========================================================================
+FAZ 4 — Scale & Genişleme (Ay 10-12)
+Hedef: 10.000 paying user · MRR $75K+ · 3 dil · B2B pipeline
+===========================================================================
+
+--- GLOBALİZASYON ---
+[ ] Çok dilli UI altyapısı (Flutter intl paketi)
+[ ] Almanca (DE) lokalizasyon
+[ ] Fransızca (FR) lokalizasyon
+[ ] Bölgesel fiyatlandırma (RevenueCat — EUR, GBP, AUD)
+[ ] UK / AU App Store optimizasyonu
+
+--- YENİ MODÜLLER ---
+[ ] Kitap kulüpleri (grup oluşturma, ortak okuma, tartışma)
+[ ] Yazar/yayınevi ortaklık sayfaları (verified badge)
+[ ] Audible API entegrasyonu (sesli kitap takibi)
+[ ] Yıllık "Reading Wrapped" raporu (Spotify Wrapped tarzı)
+[ ] Premium rozet & avatar mağazası (XP ile satın alma)
+[ ] Paige Lv 50 "Majestic Dog" formu + özel animasyon (ırka özel)
+[ ] Arkadaşların bahçelerini ziyaret etme (Focus Mode sosyal)
+[ ] Takvim entegrasyonu (okuma saatini cihaz takvimine ekleme)
+
+--- B2B ---
+[ ] Kurumsal plan altyapısı (okul / şirket)
+[ ] Admin dashboard (grup istatistikleri, kullanıcı yönetimi)
+[ ] Toplu lisans satışı için landing page
+[ ] API dokümantasyonu (3. parti entegrasyon için)
+
+--- TEKNİK SCALE ---
+[ ] Firestore sharding (yüksek yazma yükü için)
+[ ] CDN optimizasyonu (kitap kapakları, asset'ler)
+[ ] Cloud Function cold start optimizasyonu
+[ ] Load test (10K eş zamanlı kullanıcı senaryosu)
+
+===========================================================================
+SÜREGELEN GÖREVLER (her fazda)
+===========================================================================
+
+[ ] Haftalık Crashlytics review
+[ ] App Store / Play Store review yanıtlama
+[ ] Firestore backup kontrolü
+[ ] Gemini API kullanım maliyeti takibi
+[ ] RevenueCat MRR takibi
+
+===========================================================================
+KPI TAKİP TABLOSU
+===========================================================================
+
+| Metrik            | Faz 1 Hedef | Faz 2 Hedef | Faz 3 Hedef | Faz 4 Hedef |
+|-------------------|-------------|-------------|-------------|-------------|
+| Paying Users      | 100         | 500         | 2.000       | 10.000      |
+| MRR               | $500        | $2.5K       | $10K        | $75K        |
+| D30 Retention     | %40+        | %50+        | %55+        | %60+        |
+| App Store Rating  | 4.3+        | 4.4+        | 4.4+        | 4.5+        |
+| Streak Rate (D7)  | %50+        | %60+        | %65+        | %70+        |
+
+===========================================================================
+NOTLAR & KARARLAR
+===========================================================================
+
+2026-03 | App ismi "Bookpulse" olarak seçildi.
+         | bookpulse.app domain'i kontrol edilmeli — muhtemelen müsait.
+         | İlk hedef pazar EN (US/UK/AU) — TR lokalizasyon Faz 4'te değil.
+
+2026-03 | Duolingo retention mekaniklerini birebir kopyala:
+         | streak freeze, league terfi/düşüş, haftalık bildirim serisi.
+         | Farklılaştırıcı: ReadBrain quiz — okuma kalitesini ölç.
+
+2026-03 | Hard paywall kararı: soft paywall dene, conversion düşükse
+         | hemen hard'a geç. 14 gün trial kısa tutuldu (Duolingo 14 gün).
+
+2026-03 | Gemini model: gemini-2.5-flash kullan.
+         | gemini-2.0-flash KULLANMA — deprecated.

@@ -1,0 +1,13 @@
+{
+  "name": "bookpulse-backend-automation",
+  "version": "1.0.0",
+  "description": "BookPulse notification automation for Raspberry Pi",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0",
+    "node-cron": "^3.0.3"
+  }
+}

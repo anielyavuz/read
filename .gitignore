@@ -1,0 +1,97 @@
+# =============================================
+# Bookpulse .gitignore
+# =============================================
+
+# --- Secrets & Credentials ---
+.env
+.env.*
+*.keystore
+*.jks
+key.properties
+**/*.p12
+**/*.mobileprovision
+functions/ttsGoogle.json
+
+# Firebase config (contains API keys)
+android/app/google-services.json
+android/app/google-services_2.json
+ios/Runner/GoogleService-Info.plist
+ios/firebase_app_id_file.json
+macos/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+
+# --- Flutter / Dart ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+*.g.dart
+*.freezed.dart
+
+# --- IDE ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+devtools_options.yaml
+
+# --- Android ---
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle/
+/android/local.properties
+*.apk
+*.aab
+
+# --- iOS ---
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+
+# --- macOS ---
+macos/Pods/
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/ephemeral/
+
+# --- Cloud Functions ---
+functions/node_modules/
+functions/lib/
+functions/.env
+functions/.env.*
+
+# --- Admin scripts & credentials ---
+/admin/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+*.log
+
+# --- Build artifacts ---
+app.*.symbols
+app.*.map.json
+*.class
+*.pyc
+
+# --- Misc ---
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+.atom/
+
+# --- Claude Code local settings ---
+.claude/settings.local.json
