@@ -4,7 +4,7 @@ class NotificationPreferences {
   final String weekendTime;
   final int readingDurationGoal;
   final bool streakReminder;
-  final bool weeklyReport;
+  final bool challengeNotifications;
 
   const NotificationPreferences({
     this.enabled = true,
@@ -12,7 +12,7 @@ class NotificationPreferences {
     this.weekendTime = '10:00',
     this.readingDurationGoal = 30,
     this.streakReminder = true,
-    this.weeklyReport = true,
+    this.challengeNotifications = true,
   });
 
   factory NotificationPreferences.fromFirestore(Map<String, dynamic>? data) {
@@ -23,7 +23,8 @@ class NotificationPreferences {
       weekendTime: data['weekendTime'] as String? ?? '10:00',
       readingDurationGoal: data['readingDurationGoal'] as int? ?? 30,
       streakReminder: data['streakReminder'] as bool? ?? true,
-      weeklyReport: data['weeklyReport'] as bool? ?? true,
+      challengeNotifications:
+          data['challengeNotifications'] as bool? ?? true,
     );
   }
 
@@ -34,7 +35,7 @@ class NotificationPreferences {
       'weekendTime': weekendTime,
       'readingDurationGoal': readingDurationGoal,
       'streakReminder': streakReminder,
-      'weeklyReport': weeklyReport,
+      'challengeNotifications': challengeNotifications,
     };
   }
 
@@ -44,7 +45,7 @@ class NotificationPreferences {
     String? weekendTime,
     int? readingDurationGoal,
     bool? streakReminder,
-    bool? weeklyReport,
+    bool? challengeNotifications,
   }) {
     return NotificationPreferences(
       enabled: enabled ?? this.enabled,
@@ -52,7 +53,8 @@ class NotificationPreferences {
       weekendTime: weekendTime ?? this.weekendTime,
       readingDurationGoal: readingDurationGoal ?? this.readingDurationGoal,
       streakReminder: streakReminder ?? this.streakReminder,
-      weeklyReport: weeklyReport ?? this.weeklyReport,
+      challengeNotifications:
+          challengeNotifications ?? this.challengeNotifications,
     );
   }
 }

@@ -150,6 +150,8 @@ void setupServiceLocator() {
     () => NotificationSettingsCubit(
       service: getIt<NotificationPreferencesService>(),
       reminderService: getIt<ReadingReminderService>(),
+      challengeNotifService: getIt<ChallengeNotificationService>(),
+      challengeService: getIt<ChallengeService>(),
     ),
   );
 
@@ -166,6 +168,7 @@ void setupServiceLocator() {
       challengeService: getIt<ChallengeService>(),
       xpService: getIt<XpService>(),
       challengeNotificationService: getIt<ChallengeNotificationService>(),
+      notificationPrefsService: getIt<NotificationPreferencesService>(),
     ),
   );
   getIt.registerFactory<CreateChallengeCubit>(

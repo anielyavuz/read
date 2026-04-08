@@ -38,10 +38,7 @@ class _NotificationSettingsView extends StatelessWidget {
         foregroundColor: AppColors.textPrimary,
         title: Text(
           l10n.notificationSettings,
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
         ),
         centerTitle: true,
         elevation: 0,
@@ -66,198 +63,214 @@ class _NotificationSettingsView extends StatelessWidget {
           final prefs = state.preferences;
           final cubit = context.read<NotificationSettingsCubit>();
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Master toggle
-                _buildSectionCard(
-                  children: [
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(
-                        l10n.enableNotifications,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Master toggle
+                      _buildSectionCard(
+                        children: [
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              l10n.enableNotifications,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                            subtitle: !prefs.enabled
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      l10n.notificationsDisabledDesc,
+                                      style: const TextStyle(
+                                        color: AppColors.textMuted,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            value: prefs.enabled,
+                            onChanged: (_) => cubit.toggleEnabled(),
+                            activeColor: AppColors.primary,
+                            inactiveTrackColor: Colors.white.withValues(
+                              alpha: 0.1,
+                            ),
+                          ),
+                        ],
                       ),
-                      subtitle: !prefs.enabled
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                l10n.notificationsDisabledDesc,
+
+                      if (prefs.enabled) ...[
+                        const SizedBox(height: 20),
+
+                        // Reading Reminder section
+                        _buildSectionHeader(l10n.readingReminder),
+                        const SizedBox(height: 8),
+                        _buildSectionCard(
+                          children: [
+                            // Weekday time
+                            _buildTimeTile(
+                              context: context,
+                              title: l10n.weekdayReminder,
+                              currentTime: prefs.weekdayTime,
+                              onTimePicked: (time) =>
+                                  cubit.updateWeekdayTime(time),
+                            ),
+                            const Divider(
+                              color: AppColors.dividerDark,
+                              height: 1,
+                            ),
+                            // Weekend time
+                            _buildTimeTile(
+                              context: context,
+                              title: l10n.weekendReminder,
+                              currentTime: prefs.weekendTime,
+                              onTimePicked: (time) =>
+                                  cubit.updateWeekendTime(time),
+                            ),
+                            const Divider(
+                              color: AppColors.dividerDark,
+                              height: 1,
+                            ),
+                            // Reading duration goal
+                            _buildDurationSelector(
+                              context: context,
+                              l10n: l10n,
+                              currentDuration: prefs.readingDurationGoal,
+                              onChanged: (val) => cubit.setReadingDuration(val),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 4,
+                            top: 8,
+                            bottom: 4,
+                          ),
+                          child: Text(
+                            l10n.reminderInfo,
+                            style: const TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Smart Alerts section
+                        _buildSectionHeader(l10n.smartAlerts),
+                        const SizedBox(height: 8),
+                        _buildSectionCard(
+                          children: [
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                l10n.streakRiskAlert,
                                 style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 13,
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
                                 ),
                               ),
-                            )
-                          : null,
-                      value: prefs.enabled,
-                      onChanged: (_) => cubit.toggleEnabled(),
-                      activeColor: AppColors.primary,
-                      inactiveTrackColor:
-                          Colors.white.withValues(alpha: 0.1),
-                    ),
-                  ],
-                ),
-
-                if (prefs.enabled) ...[
-                  const SizedBox(height: 20),
-
-                  // Reading Reminder section
-                  _buildSectionHeader(l10n.readingReminder),
-                  const SizedBox(height: 8),
-                  _buildSectionCard(
-                    children: [
-                      // Weekday time
-                      _buildTimeTile(
-                        context: context,
-                        title: l10n.weekdayReminder,
-                        currentTime: prefs.weekdayTime,
-                        onTimePicked: (time) =>
-                            cubit.updateWeekdayTime(time),
-                      ),
-                      const Divider(
-                        color: AppColors.dividerDark,
-                        height: 1,
-                      ),
-                      // Weekend time
-                      _buildTimeTile(
-                        context: context,
-                        title: l10n.weekendReminder,
-                        currentTime: prefs.weekendTime,
-                        onTimePicked: (time) =>
-                            cubit.updateWeekendTime(time),
-                      ),
-                      const Divider(
-                        color: AppColors.dividerDark,
-                        height: 1,
-                      ),
-                      // Reading duration goal
-                      _buildDurationSelector(
-                        context: context,
-                        l10n: l10n,
-                        currentDuration: prefs.readingDurationGoal,
-                        onChanged: (val) => cubit.setReadingDuration(val),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 4, top: 8, bottom: 4),
-                    child: Text(
-                      l10n.reminderInfo,
-                      style: const TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Smart Alerts section
-                  _buildSectionHeader(l10n.smartAlerts),
-                  const SizedBox(height: 8),
-                  _buildSectionCard(
-                    children: [
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          l10n.streakRiskAlert,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15,
-                          ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            l10n.streakRiskAlertDesc,
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        value: prefs.streakReminder,
-                        onChanged: (_) => cubit.toggleStreakReminder(),
-                        activeColor: AppColors.primary,
-                        inactiveTrackColor:
-                            Colors.white.withValues(alpha: 0.1),
-                      ),
-                      const Divider(
-                        color: AppColors.dividerDark,
-                        height: 1,
-                      ),
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          l10n.weeklyReportToggle,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15,
-                          ),
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            l10n.weeklyReportDesc,
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                        value: prefs.weeklyReport,
-                        onChanged: (_) => cubit.toggleWeeklyReport(),
-                        activeColor: AppColors.primary,
-                        inactiveTrackColor:
-                            Colors.white.withValues(alpha: 0.1),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Quiet Hours
-                  _buildSectionCard(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.bedtime_rounded,
-                              size: 20,
-                              color: AppColors.textMuted,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    l10n.quietHours,
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14,
-                                    ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  l10n.streakRiskAlertDesc,
+                                  style: const TextStyle(
+                                    color: AppColors.textMuted,
+                                    fontSize: 13,
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    l10n.quietHoursDesc,
-                                    style: const TextStyle(
-                                      color: AppColors.textMuted,
-                                      fontSize: 12,
+                                ),
+                              ),
+                              value: prefs.streakReminder,
+                              onChanged: (_) => cubit.toggleStreakReminder(),
+                              activeColor: AppColors.primary,
+                              inactiveTrackColor: Colors.white.withValues(
+                                alpha: 0.1,
+                              ),
+                            ),
+                            const Divider(
+                              color: AppColors.dividerDark,
+                              height: 1,
+                            ),
+                            SwitchListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(
+                                l10n.challengeNotificationsToggle,
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  l10n.challengeNotificationsDesc,
+                                  style: const TextStyle(
+                                    color: AppColors.textMuted,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                              value: prefs.challengeNotifications,
+                              onChanged: (_) =>
+                                  cubit.toggleChallengeNotifications(),
+                              activeColor: AppColors.primary,
+                              inactiveTrackColor: Colors.white.withValues(
+                                alpha: 0.1,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Quiet Hours
+                        _buildSectionCard(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.bedtime_rounded,
+                                    size: 20,
+                                    color: AppColors.textMuted,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l10n.quietHours,
+                                          style: const TextStyle(
+                                            color: AppColors.textSecondary,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          l10n.quietHoursDesc,
+                                          style: const TextStyle(
+                                            color: AppColors.textMuted,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -265,13 +278,53 @@ class _NotificationSettingsView extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 24),
+                      ],
                     ],
                   ),
-                  const SizedBox(height: 24),
-                ],
-              ],
-            ),
+                ),
+              ),
+              // Save button
+              if (state.hasUnsavedChanges)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: state.isSaving
+                          ? null
+                          : () => cubit.saveChanges(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        disabledBackgroundColor: AppColors.primary.withValues(
+                          alpha: 0.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: state.isSaving
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              l10n.saveNotificationSettings,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+            ],
           );
         },
       ),
@@ -406,9 +459,7 @@ class _NotificationSettingsView extends StatelessWidget {
         ),
         child: DropdownButtonHideUnderline(
           child: DropdownButton<int>(
-            value: durations.contains(currentDuration)
-                ? currentDuration
-                : 30,
+            value: durations.contains(currentDuration) ? currentDuration : 30,
             dropdownColor: AppColors.surfaceDark,
             style: const TextStyle(
               color: AppColors.primary,

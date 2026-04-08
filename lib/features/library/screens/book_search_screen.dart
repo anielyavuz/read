@@ -276,7 +276,9 @@ class _BookAddContentState extends State<_BookAddContent> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    return Stack(
+      children: [
+        Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.backgroundDark,
         surfaceTintColor: Colors.transparent,
@@ -296,20 +298,11 @@ class _BookAddContentState extends State<_BookAddContent> {
           IconButton(
             onPressed: _isScanning ? null : _handleCameraScan,
             tooltip: l10n.scanBookCover,
-            icon: _isScanning
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppColors.primary,
-                    ),
-                  )
-                : const Icon(
-                    Icons.camera_alt_rounded,
-                    color: AppColors.primary,
-                    size: 22,
-                  ),
+            icon: const Icon(
+              Icons.camera_alt_rounded,
+              color: AppColors.primary,
+              size: 22,
+            ),
           ),
         ],
       ),
@@ -432,11 +425,13 @@ class _BookAddContentState extends State<_BookAddContent> {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _statusChip(l10n.currentlyReading, 'reading'),
-                const SizedBox(width: 8),
                 _statusChip(l10n.wantToRead, 'tbr'),
+                _statusChip(l10n.finished, 'finished'),
               ],
             ),
             const SizedBox(height: 32),
@@ -480,6 +475,47 @@ class _BookAddContentState extends State<_BookAddContent> {
           ],
         ),
       ),
+    ),
+        // Full-screen scanning overlay
+        if (_isScanning)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withValues(alpha: 0.7),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(
+                      width: 48,
+                      height: 48,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.scanningBookCover,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.scanningBookCoverDesc,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

@@ -2366,17 +2366,17 @@ abstract class AppLocalizations {
   /// **'Get notified at 20:00 if you haven\'t read today'**
   String get streakRiskAlertDesc;
 
-  /// No description provided for @weeklyReportToggle.
+  /// No description provided for @challengeNotificationsToggle.
   ///
   /// In en, this message translates to:
-  /// **'Weekly Report'**
-  String get weeklyReportToggle;
+  /// **'Challenge Notifications'**
+  String get challengeNotificationsToggle;
 
-  /// No description provided for @weeklyReportDesc.
+  /// No description provided for @challengeNotificationsDesc.
   ///
   /// In en, this message translates to:
-  /// **'Receive a summary every Sunday evening'**
-  String get weeklyReportDesc;
+  /// **'Get reminders for challenges you\'ve joined'**
+  String get challengeNotificationsDesc;
 
   /// No description provided for @quietHours.
   ///
@@ -2401,6 +2401,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All notifications are turned off'**
   String get notificationsDisabledDesc;
+
+  /// No description provided for @saveNotificationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveNotificationSettings;
 
   /// No description provided for @readingReminderNotifTitle.
   ///
@@ -2995,6 +3001,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stay focused while reading with our timer!\n\nModes:\nFree Timer — Open-ended reading session\nPomodoro — 25 min reading + 5 min break\nGoal-based — Read until you reach X pages\n\nBuddy Care Rewards:\nUnder 15 min — Snack\n15-29 min — Walk\n30-59 min — Play\n60+ min — Feast\n\nYour screen stays on during focus sessions so you can track your reading time easily.'**
   String get guideFocusContent;
+
+  /// No description provided for @guideChallengeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenges'**
+  String get guideChallengeTitle;
+
+  /// No description provided for @guideChallengeContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Compete with other readers in timed challenges!\n\nChallenge Types:\nRead-Along — Read the same book together\nSprint — Who reads the most pages this week?\nGenre — Finish 3 sci-fi books this month\nPages Goal — Read 1,000 pages in 30 days\n\nEach challenge has up to 30 participants with a live leaderboard.\n\nXP Rewards:\n+50 XP for joining\n+150 XP for completing\n+300 XP for finishing in Top 3\n\nYou\'ll get smart reminders before challenges end and at the halfway point.\n\nYou can turn challenge notifications on or off in Notification Settings.'**
+  String get guideChallengeContent;
+
+  /// No description provided for @guideReadBrainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ReadBrain AI Quiz'**
+  String get guideReadBrainTitle;
+
+  /// No description provided for @guideReadBrainContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test your understanding after finishing a book!\n\nAI generates 5 multiple-choice questions based on the book you\'ve read. Each question has 4 options with a brief explanation.\n\nScore 70% or higher to earn the ReadBrain Certified badge and +100 XP.\n\nYou get 3 attempts per book, then a 24-hour cooldown.\n\nPowered by Gemini AI — questions are unique and tailored to each book.'**
+  String get guideReadBrainContent;
+
+  /// No description provided for @guideAiScannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Book Scanner'**
+  String get guideAiScannerTitle;
+
+  /// No description provided for @guideAiScannerContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Add books instantly by scanning the cover with your camera!\n\nJust tap the camera icon on the Add Book screen, take a photo of any book cover, and AI will automatically extract the title, author, and page count.\n\nPowered by Gemini AI with Groq as a smart fallback — works even when one service is temporarily unavailable.'**
+  String get guideAiScannerContent;
+
+  /// No description provided for @guideCalmModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Calm Mode'**
+  String get guideCalmModeTitle;
+
+  /// No description provided for @guideCalmModeContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Want to read without the pressure of XP, streaks, and competition?\n\nCalm Mode lets you track your reading in peace. While active:\n\n• Reading won\'t earn XP\n• Your streak won\'t update\n• Leagues and challenges are paused\n• You\'ll be removed from active challenges\n\nYour reading data is still tracked — you just won\'t see gamification elements. Toggle it anytime from your profile.\n\nPerfect for vacation reading or when you just want to enjoy a book without thinking about stats.'**
+  String get guideCalmModeContent;
 
   /// No description provided for @challengeLastDayTitle.
   ///
@@ -4441,6 +4495,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scan Book Cover'**
   String get scanBookCover;
+
+  /// No description provided for @scanningBookCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyzing book cover...'**
+  String get scanningBookCover;
+
+  /// No description provided for @scanningBookCoverDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'AI is reading the cover, hang tight!'**
+  String get scanningBookCoverDesc;
 
   /// No description provided for @bookCoverNotDetected.
   ///

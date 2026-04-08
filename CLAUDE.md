@@ -94,8 +94,9 @@ Firestore'daki `system/systemInfos.slacInfoURL` alanındaki URL bu dosyaya yazı
 **Uygulama:** Bookpulse
 **Konsept:** Duolingo tarzı gamification ile kitap okuma takibi ve rekabet platformu
 **Hedef Pazar:** BookTok topluluğu (US / UK / AU) — 18-35 yaş, İngilizce
-**Model:** Subscription SaaS — 14 günlük trial → hard paywall
-**Fiyat:** Reader $4.99/ay · Bookworm $8.99/ay · Yıllık %35 indirim
+**Model:** Subscription SaaS — 7 günlük trial → subscription
+**Fiyat:** 120 TL/ay · 1200 TL/yıl
+**Free tier:** Calm Mode (gamification kapalı temel takip)
 
 ---
 
@@ -132,35 +133,24 @@ bookpulse/
 │   │   ├── services/           # Firebase, RevenueCat, Gemini servisleri
 │   │   └── utils/              # helpers, formatters
 │   ├── features/
-│   │   ├── auth/               # login, signup, onboarding
-│   │   ├── tracking/           # kitap ekleme, sayfa/süre takibi, timer
-│   │   ├── focus/              # Focus Mode ekranı, puppy diary
-│   │   ├── gamification/       # XP, streak, badge, level sistemi
-│   │   ├── companion/          # Paige puppy maskot, ırk seçimi, evrim, kişilik
+│   │   ├── auth/               # login, signup, onboarding, reading_time, reading_goal
+│   │   ├── home/               # ana sayfa dashboard, reading journey path
+│   │   ├── library/            # kitap arama, ekleme, detay, sayfa takibi, AI tarama
+│   │   ├── focus/              # Focus Mode timer (free/pomodoro/hedefli)
+│   │   ├── discover/           # challenge keşfet, detay, oluşturma
 │   │   ├── league/             # haftalık ligler, liderboard, sıralama
-│   │   ├── discover/            # challenge keşfet, challenge detay, challenge kartları
 │   │   ├── reader_profile/     # Gemini AI okuyucu profili, quiz, arketip
-│   │   ├── quiz/               # ReadBrain AI quiz modülü
-│   │   ├── social/             # arkadaşlar, aktivite akışı, paylaşım
-│   │   ├── subscription/       # RevenueCat paywall, plan seçimi
-│   │   ├── notifications/      # okuma saati, akıllı bildirimler
-│   │   └── profile/            # istatistikler, rozetler, ayarlar
+│   │   ├── social/             # arkadaşlar listesi
+│   │   ├── inbox/              # bildirim inbox
+│   │   ├── shell/              # bottom nav shell (5 tab)
+│   │   └── profile/            # istatistikler, rozetler, ayarlar, calm mode
 │   └── main.dart
-├── functions/                  # Firebase Cloud Functions
-│   ├── src/
-│   │   ├── league/             # haftalık lig hesaplama, terfi/düşüş
-│   │   ├── challenges/         # challenge oluşturma, sonuç hesaplama
-│   │   ├── notifications/      # streak hatırlatma, lig sonucu, akıllı bildirim FCM
-│   │   └── quiz/               # Gemini API çağrısı, soru üretimi
-│   └── index.ts
+├── admin/                      # Python yönetim scriptleri
+│   ├── raspiBackend.py         # Raspberry Pi backend (FCM challenge/streak bildirimleri)
+│   └── infoRaspiBackend.md     # Backend dökümantasyonu
 ├── assets/
-│   ├── images/                 # uygulama görselleri (maskot vb.)
-│   └── dogs/                   # köpek ırk görselleri (ırk başına klasör)
-│       ├── golden_retriever/   # default.jpg + gelecekte animasyonlar
-│       ├── corgi/
-│       ├── shiba_inu/
-│       └── ...                 # 11 ırk toplam
-├── animations/                 # kaynak animasyon dosyaları (design reference)
+│   ├── images/                 # uygulama görselleri
+│   └── animations/             # Lottie animasyonları
 ├── firestore.rules
 ├── firestore.indexes.json
 └── CLAUDE.md                   # bu dosya
@@ -178,13 +168,12 @@ users/{userId}
   - currentLeague: "bronze" | "silver" | "gold" | "platinum" | "diamond"
   - subscriptionTier: "free" | "reader" | "bookworm"
   - booksRead: number, pagesRead: number
-  - companionLevel: number             # Paige puppy seviyesi (1-50)
-  - companionName: string              # kullanıcının verdiği isim
-  - companionBreed: string             # köpek ırkı (golden_retriever, corgi, shiba_inu, vb.)
-  - companionMood: "happy" | "playful" | "sulky" | "sleeping" | "excited"
-  - companionLastFed: timestamp        # son okuma aktivitesi (bakım durumu için)
+  - calmMode: boolean                   # Sakin Mod aktif mi
+  - dailyPageGoal: number               # günlük sayfa hedefi
   - readingSchedule: { weekday: "21:00", weekend: "10:00", duration: 30 }
   - focusMinutesTotal: number           # toplam Focus Mode süresi
+  - notificationPrefs: { enabled, weekdayTime, weekendTime, readingDurationGoal, streakReminder, challengeNotifications }
+  - fcmToken: string                    # FCM push notification token
 
 books/{bookId}                   # Google Books'tan cache
   - title, author, coverUrl, pageCount, isbn
@@ -215,7 +204,6 @@ challenges/{challengeId}/participants/{userId}
 focusSessions/{userId}/{sessionId}
   - startTime, endTime, durationMinutes
   - bookId, pagesRead
-  - puppyCareReward: string           # kazanilan puppy odul (snack/walk/play/feast)
 
 quizResults/{userId}/{bookId}
   - questions[], answers[], score, completedAt
@@ -284,9 +272,6 @@ Challenge Rozetleri:
 Özel:
   - ReadBrain Certified → quiz %70+ puan
   - Diamond League      → Diamond lig'e ulaşma
-  - Puppy Caretaker     → 50 focus seans puppy bakimi tamamlama
-  - Paige's Best Friend → puppy'yi Lv 25'e ulaştırma
-  - Top Dog             → puppy'yi Lv 50 Majestic Dog'a ulaştırma
 
 Her rozet BookTok/Instagram Story formatında paylaşılabilir PNG kartı üretir.
 ```
@@ -388,139 +373,28 @@ Akıllı Challenge Bildirimleri:
 
 ---
 
-## Focus Mode (Puppy Care)
+## Focus Mode
 
-Paige puppy ile entegre odaklanma modu.
-Timer başlatılır, okuma süresince puppy eşlik eder.
-Seans tamamlandığında süreye göre puppy bakım ödülü kazanılır.
+Timer tabanli odaklanma modu. Kitap secilir, timer baslatilir, seans tamamlaninca
+XP kazanilir ve focus session Firestore'a kaydedilir.
 
 ```
 Modlar:
-  - Pomodoro    → 25 dk okuma + 5 dk mola (tekrarlı)
-  - Free Timer  → serbest süre (stopwatch)
+  - Free Timer  → serbest sure (stopwatch)
+  - Pomodoro    → 25 dk okuma + 5 dk mola (tekrarli)
   - Hedefli     → "X sayfa okuyana kadar" modu
 
-Puppy Bakım Ödülleri (süreye göre):
-  - 15 dk altı  → Snack (atıştırmalık)
-  - 15-29 dk    → Walk (yürüyüş)
-  - 30-59 dk    → Play (oyun)
-  - 60 dk+      → Feast (ziyafet)
-  - Puppy Diary: Haftalık 7 günlük grid görünümü (bakım geçmişi)
-  - Arkadaşlarla "Co-Reading" seansı (Flora modeli)
-    Tüm katılımcılar odaklanmalı, biri çıkarsa seans iptal
-
-XP Ödülleri:
+XP Odulleri:
   +15 XP  → 15 dk focus seans tamamlama
   +30 XP  → 30 dk focus seans tamamlama
   +50 XP  → 60 dk+ focus seans tamamlama
-  x2 XP   → Co-Reading seansı bonusu
-```
 
----
-
-## Paige — Okuma Maskotu (Puppy)
-
-Finch uygulamasından ilham alan pozitif pekiştirmeli maskot sistemi.
-"Paige" (sayfa kelimesinden türetilmiş) sevimli bir köpek yavrusu (puppy).
-Kullanıcı onboarding'de 11 ırktan birini seçer ve isim verir.
-Her ırkın kendine özgü bir trait'i (özelliği) var — oyun mekaniğiyle bağlantılı.
-Seçilen ırk, okuma hedefi varsayılanını belirler.
-
-```
-Irk Seçenekleri (11 farklı — her birinin trait + varsayılan günlük hedefi var):
-
-  Irk                  Trait             Hedef  Açıklama
-  ─────────────────────────────────────────────────────────────────────
-  1. Golden Retriever  Streak Lover      20pg   Seriyi asla bozmaz! Her gün okuma ister.
-  2. Corgi             Sprint Champion   15pg   Kısa ve hızlı! Sprint okuma seanslarını sever.
-  3. Shiba Inu         Lone Wolf         25pg   Kendi hızında okur. Derin & odaklı seanslar.
-  4. Poodle            Quiz Master       20pg   Beyin gücü! Her kitaptan sonra quiz ister.
-  5. Dalmatian         Challenger        30pg   Rekabet için doğmuş! Challenge'lar için yaşar.
-  6. Siberian Husky    Drama Queen       20pg   Her şeye aşırı tepki verir!
-  7. German Shepherd   Disciplined       25pg   Sıkı rutin. Mazeret yok, tatil yok.
-  8. Rottweiler        Endurance         30pg   Maraton okuyucu. Uzun focus seansları.
-  9. Border Collie     Goal Crusher      25pg   Haftalık hedeflere takılmış. Asla kaçırmaz.
-  10. Kangal           League Warrior    20pg   Liderlik tablosunu tırmanır. Top 10 ya da hiç!
-  11. Saint Bernard    Zen Reader        15pg   Acele yok, stres yok. Yolculuğun tadını çıkarır.
-
-  Trait → Mekanik Bağlantısı:
-  - Streak Lover     → streak XP bonusu vurgulanır, streak kırılınca ekstra üzgün
-  - Sprint Champion  → kısa challenge'larda bonus, sprint modu önerilir
-  - Lone Wolf        → uzun solo focus seanslarında bonus
-  - Quiz Master      → ReadBrain quiz hatırlatması daha sık, quiz XP bonusu
-  - Challenger       → challenge katılma teşviki, challenge XP bonusu
-  - Drama Queen      → aşırı dramatik animasyonlar (sevinç/üzüntü)
-  - Disciplined      → sabit okuma saati hatırlatması daha güçlü
-  - Endurance        → uzun focus seans bonusu (60dk+)
-  - Goal Crusher     → haftalık hedef tracking vurgulanır
-  - League Warrior   → lig sıralama bildirimleri daha sık
-  - Zen Reader       → focus mode ambient sesler vurgulanır, yumuşak hatırlatmalar
-
-  Asset Yapısı:
-  assets/dogs/{breed_id}/default.jpg   — varsayılan görsel (mevcut)
-  assets/dogs/{breed_id}/happy.json    — Lottie animasyonu (gelecek)
-  assets/dogs/{breed_id}/sad.json      — Lottie animasyonu (gelecek)
-  Her ırk için ayrı klasör — yeni görseller/animasyonlar kolayca eklenebilir
-
-Büyüme Seviyeleri (YAVAŞ büyüme — haftalar/aylar sürer):
-  Lv 1-5    → Tiny Pup (minik, tombul, uyuşuk — yeni doğmuş yavru)
-  Lv 6-15   → Playful Pup (oyuncu, kulakları büyük, hareketli)
-  Lv 16-30  → Growing Dog (gençleşen, daha bakımlı, parlak tüyler)
-  Lv 31-45  → Handsome Dog (yakışıklı/güzel, fit, parlayan tüyler)
-  Lv 46-50  → Majestic Dog (muhteşem, taç/aura, şampiyon köpek görünümü)
-
-  Büyüme Hızı:
-  - Her 500 XP = 1 seviye (yavaş ve tatmin edici)
-  - Max seviyeye ulaşmak ~6 ay düzenli okuma gerektirir
-  - Seviye atladıkça köpek görsel olarak büyür ve güzelleşir:
-    tüyler parlar, duruş değişir, göz ifadesi olgunlaşır
-
-Bakım Durumu (okuma aktivitesine göre):
-  Düzenli okuma (her gün):
-    - Tüyler parlak ve bakımlı
-    - Kuyruk sallar, zıplar, mutlu animasyonlar
-    - Minik kalpler/yıldızlar çıkar
-
-  1-2 gün okumama:
-    - Hafif küskün bakış, kulaklar düşük
-    - "I miss our reading time..." baloncuğu
-    - Hâlâ sevimli ama biraz üzgün
-
-  3-4 gün okumama:
-    - Trip atar! Sırtını döner, yan bakış yapar
-    - "Hmph! You forgot about me..." baloncuğu
-    - Tüyler hafif kabarık/dağınık
-
-  5+ gün okumama:
-    - Dramatik küsme: battaniyeye sarılıp uyur
-    - "Wake me up when you start reading again..."
-    - Ama geri dönünce SÜPER mutlu karşılama animasyonu!
-    - (Asla cezalandırma YOK — sadece duygusal motivasyon)
-
-Geri Dönüş Sevinçleri:
-  - 1 gün ara sonrası: kuyruk sallama + zıplama
-  - 3+ gün ara sonrası: delicesine koşma + yüze atlama animasyonu
-  - 7+ gün ara sonrası: gözyaşı + "YOU'RE BACK!" + havai fişek
-
-Kişilik Özellikleri (okunan türlere göre):
-  - Romantik kitap çok okuyorsa: dramatik iç çeker, kalp gözler yapar
-  - Gerilim/polisiye okuyorsa: dedektif şapka takar, ipucu koklama animasyonu
-  - Bilim kurgu okuyorsa: uzay gözlüğü takar, fütüristik tepkiler
-  - Fantastik okuyorsa: büyücü şapka, sihirli kuyruk sallama
-  - Non-fiction okuyorsa: gözlük takar, "akıllı köpek" pozu
-
-Etkileşimler:
-  - Uygulama açılışında selamlama (günün saatine göre — sabah esner, akşam uyuşuk)
-  - Streak korunduğunda kutlama animasyonu (kemik yakalar, dönerek zıplar)
-  - Kitap bitirildiğinde: kitapla oynama animasyonu + kısa yorum
-  - Seviye atlayınca: özel evrim animasyonu (büyüme efekti)
-  - BookTok paylaşım kartlarında Paige görünür
-
-Kıyafet & Aksesuar:
-  - XP ile açılan aksesuarlar (tasma, bandana, gözlük, şapka, pelerin)
-  - Irka özel aksesuarlar (Corgi taç, Husky kış atkısı vb.)
-  - Sezonluk özel kostümler (Noel kazağı, Halloween kostümü, yaz şapkası)
-  - Bookworm plan: premium kostümler + özel ırk varyasyonları (rare renkler)
+Ozellikler:
+  - Ekran acik kalir (wakelock)
+  - Konfeti animasyonu seans tamamlaninca
+  - Ses & haptic feedback
+  - Seans sirasinda not alma (BookNotesSheet)
+  - Badge acma (focus milestone'lari)
 ```
 
 ---
@@ -536,7 +410,7 @@ Okuma Saati:
 
 Bildirim Türleri:
   1. Okuma Saati Hatırlatma
-     "Hey! Okuma saatin 10 dakika sonra başlıyor. Paige seni bekliyor!"
+     "Hey! Okuma saatin 10 dakika sonra başlıyor!"
 
   2. Streak Risk Uyarısı (gece 20:00)
      "14 günlük streak'in risk altında! Bugün sadece 5 dk yeterli."

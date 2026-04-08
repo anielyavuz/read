@@ -5,6 +5,7 @@ class SystemInfoService {
   String? _cachedGeminiKey;
   String? _cachedGeminiModel;
   String? _cachedGroqKey;
+  String? _cachedGroqImageKey;
   bool _fetched = false;
 
   SystemInfoService({FirebaseFirestore? firestore})
@@ -25,6 +26,11 @@ class SystemInfoService {
     return _cachedGroqKey!;
   }
 
+  Future<String> getGroqImageKey() async {
+    await _ensureFetched();
+    return _cachedGroqImageKey!;
+  }
+
   Future<void> _ensureFetched() async {
     if (_fetched) return;
     try {
@@ -36,10 +42,12 @@ class SystemInfoService {
       _cachedGeminiModel =
           gemini?['modelName'] as String? ?? 'gemini-2.5-flash';
       _cachedGroqKey = data?['groqKey'] as String? ?? '';
+      _cachedGroqImageKey = data?['groqImageKey'] as String? ?? '';
     } catch (_) {
       _cachedGeminiKey = '';
       _cachedGeminiModel = 'gemini-2.5-flash';
       _cachedGroqKey = '';
+      _cachedGroqImageKey = '';
     }
     _fetched = true;
   }

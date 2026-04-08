@@ -1219,10 +1219,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get streakRiskAlertDesc => 'Bugun okumadiysan 20:00\'de bildirim al';
 
   @override
-  String get weeklyReportToggle => 'Haftalik Rapor';
+  String get challengeNotificationsToggle => 'Challenge Bildirimleri';
 
   @override
-  String get weeklyReportDesc => 'Her pazar aksami bir ozet al';
+  String get challengeNotificationsDesc =>
+      'Katildigin challenge\'lar icin hatirlatma al';
 
   @override
   String get quietHours => 'Sessiz Saatler';
@@ -1237,6 +1238,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notificationsDisabledDesc => 'Tum bildirimler kapatildi';
+
+  @override
+  String get saveNotificationSettings => 'Degisiklikleri Kaydet';
 
   @override
   String get readingReminderNotifTitle => 'Okuma vakti!';
@@ -1560,6 +1564,34 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get guideFocusContent =>
       'Zamanlayıcımızla okurken odaklan!\n\nModlar:\nSerbest Zamanlayıcı — Açık uçlu okuma seansı\nPomodoro — 25 dk okuma + 5 dk mola\nHedef Bazlı — X sayfaya ulaşana kadar oku\n\nArkadaş Bakım Ödülleri:\n15 dk altı — Atıştırmalık\n15-29 dk — Yürüyüş\n30-59 dk — Oyun\n60+ dk — Ziyafet\n\nOdak seansları sırasında ekranınız açık kalır, böylece okuma sürenizi kolayca takip edebilirsiniz.';
+
+  @override
+  String get guideChallengeTitle => 'Challenge\'lar';
+
+  @override
+  String get guideChallengeContent =>
+      'Diger okuyucularla zamanli challenge\'larda yaris!\n\nChallenge Turleri:\nBirlikte Okuma — Ayni kitabi birlikte oku\nSprint — Bu hafta en cok sayfayi kim okur?\nTur — Bu ay 3 bilim kurgu kitabi bitir\nSayfa Hedefi — 30 gunde 1.000 sayfa oku\n\nHer challenge\'da 30 katilimci ve canli siralama tablosu var.\n\nXP Odulleri:\n+50 XP katilma\n+150 XP tamamlama\n+300 XP ilk 3\'te bitirme\n\nChallenge bitmeden ve yari noktada akilli hatirlatmalar alirsin.\n\nChallenge bildirimlerini Bildirim Ayarlarindan acip kapatabilirsin.';
+
+  @override
+  String get guideReadBrainTitle => 'ReadBrain AI Quiz';
+
+  @override
+  String get guideReadBrainContent =>
+      'Bir kitabi bitirdikten sonra anladigini test et!\n\nAI, okudugun kitaba ozel 5 coktan secmeli soru uretir. Her sorunun 4 secenegi ve kisa bir aciklamasi var.\n\n%70 ve uzeri puan alarak ReadBrain Sertifikali rozetini ve +100 XP kazan.\n\nKitap basina 3 deneme hakkin var, sonra 24 saat bekleme suresi.\n\nGemini AI tarafindan desteklenir — sorular her kitaba ozel ve benzersizdir.';
+
+  @override
+  String get guideAiScannerTitle => 'AI Kitap Tarayici';
+
+  @override
+  String get guideAiScannerContent =>
+      'Kapagi kamerayla tarayarak kitaplari aninda ekle!\n\nKitap Ekle ekranindaki kamera ikonuna dokun, herhangi bir kitap kapaginin fotografini cek — AI otomatik olarak kitap adini, yazari ve sayfa sayisini cikarir.\n\nGemini AI tarafindan desteklenir, Groq akilli yedek olarak calisir — bir servis gecici olarak kullanilamazsa bile calisir.';
+
+  @override
+  String get guideCalmModeTitle => 'Sakin Mod';
+
+  @override
+  String get guideCalmModeContent =>
+      'XP, seri ve rekabet baskisi olmadan mi okumak istiyorsun?\n\nSakin Mod okumani huzur icinde takip etmeni saglar. Aktifken:\n\n• Okuma XP kazandirmaz\n• Serin guncellenmez\n• Ligler ve challenge\'lar duraklatilir\n• Aktif challenge\'lardan cikarilirsin\n\nOkuma verilerin hala takip edilir — sadece oyunlastirma ogelerini gormezsin. Profilinden istedigin zaman ac/kapat.\n\nTatil okumasi icin veya istatistikleri dusunmeden bir kitabin tadini cikarmak istedigin zamanlar icin mukemmel.';
 
   @override
   String get challengeLastDayTitle => 'Challenge yarın bitiyor!';
@@ -2371,6 +2403,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get scanBookCover => 'Kitap Kapağını Tara';
+
+  @override
+  String get scanningBookCover => 'Kitap kapagi analiz ediliyor...';
+
+  @override
+  String get scanningBookCoverDesc => 'AI kapagi okuyor, biraz bekle!';
 
   @override
   String get bookCoverNotDetected =>

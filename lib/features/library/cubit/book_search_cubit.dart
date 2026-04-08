@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../../../core/models/book.dart';
 import '../../../core/services/book_library_service.dart';
 import '../../../core/services/google_books_service.dart';
+import '../../../core/services/groq_vision_service.dart';
 import '../../../core/services/remote_logger_service.dart';
 import '../../../core/services/system_info_service.dart';
 import 'book_search_state.dart';
@@ -107,23 +109,60 @@ class BookSearchCubit extends Cubit<BookSearchState> {
     }
   }
 
+  /// Scans a book cover image using Gemini, with Groq Vision as fallback.
   Future<void> scanBookCover(String imagePath) async {
     emit(state.copyWith(coverScanStatus: CoverScanStatus.scanning));
 
+    // --- Try Gemini first ---
+    Map<String, dynamic>? json = await _tryGeminiScan(imagePath);
+    String provider = 'gemini';
+
+    // --- Fallback to Groq Vision if Gemini failed ---
+    if (json == null) {
+      dev.log('Gemini scan failed, trying Groq Vision fallback...',
+          name: 'BookSearchCubit');
+      json = await _tryGroqScan(imagePath);
+      provider = 'groq';
+    }
+
+    // --- Both failed ---
+    if (json == null) {
+      emit(state.copyWith(coverScanStatus: CoverScanStatus.error));
+      return;
+    }
+
+    // --- Process result ---
+    final isBook = json['isBook'] as bool? ?? false;
+    if (!isBook) {
+      emit(state.copyWith(coverScanStatus: CoverScanStatus.notABook));
+      return;
+    }
+
+    final result = CoverScanResult(
+      title: json['title'] as String?,
+      author: json['author'] as String?,
+      pageCount: json['pageCount'] as int?,
+    );
+
+    RemoteLoggerService.book('Book cover scanned',
+      bookTitle: result.title,
+      screen: 'book_search',
+      details: {'provider': provider});
+
+    emit(state.copyWith(
+      coverScanStatus: CoverScanStatus.success,
+      coverScanResult: result,
+    ));
+  }
+
+  /// Attempts book cover scan via Gemini. Returns parsed JSON or null.
+  Future<Map<String, dynamic>?> _tryGeminiScan(String imagePath) async {
     try {
       final apiKey = await _systemInfoService.getGeminiApiKey();
       final modelName = await _systemInfoService.getGeminiModelName();
+      if (apiKey.isEmpty) return null;
 
-      if (apiKey.isEmpty) {
-        emit(state.copyWith(coverScanStatus: CoverScanStatus.error));
-        return;
-      }
-
-      final model = GenerativeModel(
-        model: modelName,
-        apiKey: apiKey,
-      );
-
+      final model = GenerativeModel(model: modelName, apiKey: apiKey);
       final imageBytes = await File(imagePath).readAsBytes();
       final imagePart = DataPart('image/jpeg', imageBytes);
 
@@ -139,51 +178,49 @@ If this is NOT a book image, return: {"isBook": false}
 ''';
 
       final response = await model.generateContent([
-        Content.multi([
-          TextPart(prompt),
-          imagePart,
-        ]),
+        Content.multi([TextPart(prompt), imagePart]),
       ]);
 
       final text = response.text;
-      if (text == null || text.isEmpty) {
-        emit(state.copyWith(coverScanStatus: CoverScanStatus.error));
-        return;
-      }
+      if (text == null || text.isEmpty) return null;
 
-      // Extract JSON from response (might be wrapped in markdown code block)
-      String jsonStr = text.trim();
-      if (jsonStr.contains('```')) {
-        final match = RegExp(r'```(?:json)?\s*([\s\S]*?)```').firstMatch(jsonStr);
-        if (match != null) {
-          jsonStr = match.group(1)!.trim();
-        }
-      }
-
-      final json = jsonDecode(jsonStr) as Map<String, dynamic>;
-      final isBook = json['isBook'] as bool? ?? false;
-
-      if (!isBook) {
-        emit(state.copyWith(coverScanStatus: CoverScanStatus.notABook));
-        return;
-      }
-
-      final result = CoverScanResult(
-        title: json['title'] as String?,
-        author: json['author'] as String?,
-        pageCount: json['pageCount'] as int?,
-      );
-
-      RemoteLoggerService.book('Book cover scanned',
-        bookTitle: result.title,
-        screen: 'book_search');
-
-      emit(state.copyWith(
-        coverScanStatus: CoverScanStatus.success,
-        coverScanResult: result,
-      ));
+      return _parseJsonResponse(text);
     } catch (e) {
-      emit(state.copyWith(coverScanStatus: CoverScanStatus.error));
+      dev.log('Gemini scan error: $e', name: 'BookSearchCubit');
+      return null;
+    }
+  }
+
+  /// Attempts book cover scan via Groq Vision (fallback). Returns parsed JSON or null.
+  Future<Map<String, dynamic>?> _tryGroqScan(String imagePath) async {
+    try {
+      final apiKey = await _systemInfoService.getGroqImageKey();
+      if (apiKey.isEmpty) return null;
+
+      return await GroqVisionService.scanBookCover(
+        apiKey: apiKey,
+        imagePath: imagePath,
+      );
+    } catch (e) {
+      dev.log('Groq scan error: $e', name: 'BookSearchCubit');
+      return null;
+    }
+  }
+
+  /// Extracts JSON from a response that may be wrapped in markdown code blocks.
+  static Map<String, dynamic>? _parseJsonResponse(String text) {
+    String jsonStr = text.trim();
+    if (jsonStr.contains('```')) {
+      final match =
+          RegExp(r'```(?:json)?\s*([\s\S]*?)```').firstMatch(jsonStr);
+      if (match != null) {
+        jsonStr = match.group(1)!.trim();
+      }
+    }
+    try {
+      return jsonDecode(jsonStr) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
     }
   }
 

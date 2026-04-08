@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/models/challenge.dart';
 import '../../../core/services/challenge_service.dart';
 import '../../../core/services/challenge_notification_service.dart';
+import '../../../core/services/notification_preferences_service.dart';
 import '../../../core/services/remote_logger_service.dart';
 import '../../../core/services/xp_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -12,14 +13,17 @@ class ChallengeDetailCubit extends Cubit<ChallengeDetailState> {
   final ChallengeService _challengeService;
   final XpService _xpService;
   final ChallengeNotificationService _challengeNotificationService;
+  final NotificationPreferencesService _notificationPrefsService;
 
   ChallengeDetailCubit({
     required ChallengeService challengeService,
     required XpService xpService,
     required ChallengeNotificationService challengeNotificationService,
+    required NotificationPreferencesService notificationPrefsService,
   })  : _challengeService = challengeService,
         _xpService = xpService,
         _challengeNotificationService = challengeNotificationService,
+        _notificationPrefsService = notificationPrefsService,
         super(const ChallengeDetailState());
 
   /// Loads a challenge and its participants.
@@ -147,11 +151,16 @@ class ChallengeDetailCubit extends Cubit<ChallengeDetailState> {
   }
 
   /// Builds type-specific localized notification strings and schedules them.
+  /// Skips scheduling if the user has disabled challenge notifications.
   Future<void> _scheduleChallengeNotifications(
     Challenge challenge,
     AppLocalizations l10n,
   ) async {
     try {
+      // Respect user's challenge notification preference
+      final prefs = await _notificationPrefsService.getPreferences();
+      if (!prefs.enabled || !prefs.challengeNotifications) return;
+
       final title = challenge.title;
 
       // Build type-specific last day body

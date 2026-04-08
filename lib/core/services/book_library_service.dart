@@ -31,12 +31,14 @@ class BookLibraryService {
     await _booksRef.doc(book.id).set(book.toFirestore(), SetOptions(merge: true));
 
     // Add to user library
+    final isFinished = status == 'finished';
     final userBook = UserBook(
       bookId: book.id,
       status: status,
-      currentPage: 0,
+      currentPage: isFinished ? book.pageCount : 0,
       totalPages: book.pageCount,
       startDate: status == 'reading' ? DateTime.now() : null,
+      finishDate: isFinished ? DateTime.now() : null,
       title: book.title,
       authors: book.authors,
       coverUrl: book.coverUrl,

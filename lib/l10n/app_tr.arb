@@ -432,13 +432,14 @@
   "smartAlerts": "AKILLI UYARILAR",
   "streakRiskAlert": "Seri Risk Uyarisi",
   "streakRiskAlertDesc": "Bugun okumadiysan 20:00'de bildirim al",
-  "weeklyReportToggle": "Haftalik Rapor",
-  "weeklyReportDesc": "Her pazar aksami bir ozet al",
+  "challengeNotificationsToggle": "Challenge Bildirimleri",
+  "challengeNotificationsDesc": "Katildigin challenge'lar icin hatirlatma al",
   "quietHours": "Sessiz Saatler",
   "quietHoursDesc": "23:00 - 07:00 arasi bildirim gonderilmez",
   "minutesDuration": "{min} dakika",
   "@minutesDuration": { "placeholders": { "min": { "type": "int" } } },
   "notificationsDisabledDesc": "Tum bildirimler kapatildi",
+  "saveNotificationSettings": "Degisiklikleri Kaydet",
   "readingReminderNotifTitle": "Okuma vakti!",
   "readingReminderNotifBody": "Okuma seansin birazdan basliyor. Hadi yapabilirsin!",
   "bookFinishedTitle": "Bir kitap bitirdin!",
@@ -558,6 +559,18 @@
   "guideBadgeContent": "Okuma başarıları için rozet kazan:\n\nOkuma Rozetleri:\nİlk Sayfa — İlk sayfanı oku\nKitap Kurdu — 10 kitap bitir\nYüzler Kulübü — 100 kitap bitir\nHızlı Okuyucu — 3 günden kısa sürede kitap bitir\nTür Kaşifi — 5 farklı türde kitap oku\n\nSeri Rozetleri:\nAlevlerde (7 gün), Durdurulamaz (30 gün), Efsane (100 gün), Ölümsüz (365 gün)\n\nÖzel Rozetler:\nReadBrain Sertifikalı — Quiz puanı %70+\nElmas Ligi — Elmas seviyeye ulaş\nPaige'in En İyi Arkadaşı — Arkadaş Sv 25'e ulaşsın\nŞampiyon Köpek — Arkadaş Sv 50'ye ulaşsın\n\nTüm rozetler BookTok/Instagram Story formatında paylaşılabilir!",
   "guideFocusTitle": "Odak Modu",
   "guideFocusContent": "Zamanlayıcımızla okurken odaklan!\n\nModlar:\nSerbest Zamanlayıcı — Açık uçlu okuma seansı\nPomodoro — 25 dk okuma + 5 dk mola\nHedef Bazlı — X sayfaya ulaşana kadar oku\n\nArkadaş Bakım Ödülleri:\n15 dk altı — Atıştırmalık\n15-29 dk — Yürüyüş\n30-59 dk — Oyun\n60+ dk — Ziyafet\n\nOdak seansları sırasında ekranınız açık kalır, böylece okuma sürenizi kolayca takip edebilirsiniz.",
+
+  "guideChallengeTitle": "Challenge'lar",
+  "guideChallengeContent": "Diger okuyucularla zamanli challenge'larda yaris!\n\nChallenge Turleri:\nBirlikte Okuma — Ayni kitabi birlikte oku\nSprint — Bu hafta en cok sayfayi kim okur?\nTur — Bu ay 3 bilim kurgu kitabi bitir\nSayfa Hedefi — 30 gunde 1.000 sayfa oku\n\nHer challenge'da 30 katilimci ve canli siralama tablosu var.\n\nXP Odulleri:\n+50 XP katilma\n+150 XP tamamlama\n+300 XP ilk 3'te bitirme\n\nChallenge bitmeden ve yari noktada akilli hatirlatmalar alirsin.\n\nChallenge bildirimlerini Bildirim Ayarlarindan acip kapatabilirsin.",
+
+  "guideReadBrainTitle": "ReadBrain AI Quiz",
+  "guideReadBrainContent": "Bir kitabi bitirdikten sonra anladigini test et!\n\nAI, okudugun kitaba ozel 5 coktan secmeli soru uretir. Her sorunun 4 secenegi ve kisa bir aciklamasi var.\n\n%70 ve uzeri puan alarak ReadBrain Sertifikali rozetini ve +100 XP kazan.\n\nKitap basina 3 deneme hakkin var, sonra 24 saat bekleme suresi.\n\nGemini AI tarafindan desteklenir — sorular her kitaba ozel ve benzersizdir.",
+
+  "guideAiScannerTitle": "AI Kitap Tarayici",
+  "guideAiScannerContent": "Kapagi kamerayla tarayarak kitaplari aninda ekle!\n\nKitap Ekle ekranindaki kamera ikonuna dokun, herhangi bir kitap kapaginin fotografini cek — AI otomatik olarak kitap adini, yazari ve sayfa sayisini cikarir.\n\nGemini AI tarafindan desteklenir, Groq akilli yedek olarak calisir — bir servis gecici olarak kullanilamazsa bile calisir.",
+
+  "guideCalmModeTitle": "Sakin Mod",
+  "guideCalmModeContent": "XP, seri ve rekabet baskisi olmadan mi okumak istiyorsun?\n\nSakin Mod okumani huzur icinde takip etmeni saglar. Aktifken:\n\n• Okuma XP kazandirmaz\n• Serin guncellenmez\n• Ligler ve challenge'lar duraklatilir\n• Aktif challenge'lardan cikarilirsin\n\nOkuma verilerin hala takip edilir — sadece oyunlastirma ogelerini gormezsin. Profilinden istedigin zaman ac/kapat.\n\nTatil okumasi icin veya istatistikleri dusunmeden bir kitabin tadini cikarmak istedigin zamanlar icin mukemmel.",
 
   "challengeLastDayTitle": "Challenge yarın bitiyor!",
   "challengeLastDayBody": "\"{title}\" yarın sona eriyor. Sıralamada yükselmek için okumaya devam et!",
@@ -891,6 +904,8 @@
   "swipeToStartReading": "Okumaya başlamak için sağa kaydır",
 
   "scanBookCover": "Kitap Kapağını Tara",
+  "scanningBookCover": "Kitap kapagi analiz ediliyor...",
+  "scanningBookCoverDesc": "AI kapagi okuyor, biraz bekle!",
   "bookCoverNotDetected": "Kitap algılanamadı. Lütfen kontrol edip tekrar deneyin.",
   "bookCoverScanError": "Kitap kapağı taranamadı. Lütfen tekrar deneyin.",
   "addCoverPhoto": "Kapak Fotoğrafı Ekle (Opsiyonel)",

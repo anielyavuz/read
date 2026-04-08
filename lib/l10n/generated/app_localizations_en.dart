@@ -1223,10 +1223,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Get notified at 20:00 if you haven\'t read today';
 
   @override
-  String get weeklyReportToggle => 'Weekly Report';
+  String get challengeNotificationsToggle => 'Challenge Notifications';
 
   @override
-  String get weeklyReportDesc => 'Receive a summary every Sunday evening';
+  String get challengeNotificationsDesc =>
+      'Get reminders for challenges you\'ve joined';
 
   @override
   String get quietHours => 'Quiet Hours';
@@ -1241,6 +1242,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsDisabledDesc => 'All notifications are turned off';
+
+  @override
+  String get saveNotificationSettings => 'Save Changes';
 
   @override
   String get readingReminderNotifTitle => 'Time to read!';
@@ -1565,6 +1569,34 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get guideFocusContent =>
       'Stay focused while reading with our timer!\n\nModes:\nFree Timer — Open-ended reading session\nPomodoro — 25 min reading + 5 min break\nGoal-based — Read until you reach X pages\n\nBuddy Care Rewards:\nUnder 15 min — Snack\n15-29 min — Walk\n30-59 min — Play\n60+ min — Feast\n\nYour screen stays on during focus sessions so you can track your reading time easily.';
+
+  @override
+  String get guideChallengeTitle => 'Challenges';
+
+  @override
+  String get guideChallengeContent =>
+      'Compete with other readers in timed challenges!\n\nChallenge Types:\nRead-Along — Read the same book together\nSprint — Who reads the most pages this week?\nGenre — Finish 3 sci-fi books this month\nPages Goal — Read 1,000 pages in 30 days\n\nEach challenge has up to 30 participants with a live leaderboard.\n\nXP Rewards:\n+50 XP for joining\n+150 XP for completing\n+300 XP for finishing in Top 3\n\nYou\'ll get smart reminders before challenges end and at the halfway point.\n\nYou can turn challenge notifications on or off in Notification Settings.';
+
+  @override
+  String get guideReadBrainTitle => 'ReadBrain AI Quiz';
+
+  @override
+  String get guideReadBrainContent =>
+      'Test your understanding after finishing a book!\n\nAI generates 5 multiple-choice questions based on the book you\'ve read. Each question has 4 options with a brief explanation.\n\nScore 70% or higher to earn the ReadBrain Certified badge and +100 XP.\n\nYou get 3 attempts per book, then a 24-hour cooldown.\n\nPowered by Gemini AI — questions are unique and tailored to each book.';
+
+  @override
+  String get guideAiScannerTitle => 'AI Book Scanner';
+
+  @override
+  String get guideAiScannerContent =>
+      'Add books instantly by scanning the cover with your camera!\n\nJust tap the camera icon on the Add Book screen, take a photo of any book cover, and AI will automatically extract the title, author, and page count.\n\nPowered by Gemini AI with Groq as a smart fallback — works even when one service is temporarily unavailable.';
+
+  @override
+  String get guideCalmModeTitle => 'Calm Mode';
+
+  @override
+  String get guideCalmModeContent =>
+      'Want to read without the pressure of XP, streaks, and competition?\n\nCalm Mode lets you track your reading in peace. While active:\n\n• Reading won\'t earn XP\n• Your streak won\'t update\n• Leagues and challenges are paused\n• You\'ll be removed from active challenges\n\nYour reading data is still tracked — you just won\'t see gamification elements. Toggle it anytime from your profile.\n\nPerfect for vacation reading or when you just want to enjoy a book without thinking about stats.';
 
   @override
   String get challengeLastDayTitle => 'Challenge ends tomorrow!';
@@ -2374,6 +2406,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanBookCover => 'Scan Book Cover';
+
+  @override
+  String get scanningBookCover => 'Analyzing book cover...';
+
+  @override
+  String get scanningBookCoverDesc => 'AI is reading the cover, hang tight!';
 
   @override
   String get bookCoverNotDetected =>

@@ -441,13 +441,14 @@
   "smartAlerts": "SMART ALERTS",
   "streakRiskAlert": "Streak Risk Alert",
   "streakRiskAlertDesc": "Get notified at 20:00 if you haven't read today",
-  "weeklyReportToggle": "Weekly Report",
-  "weeklyReportDesc": "Receive a summary every Sunday evening",
+  "challengeNotificationsToggle": "Challenge Notifications",
+  "challengeNotificationsDesc": "Get reminders for challenges you've joined",
   "quietHours": "Quiet Hours",
   "quietHoursDesc": "No notifications between 23:00 - 07:00",
   "minutesDuration": "{min} minutes",
   "@minutesDuration": { "placeholders": { "min": { "type": "int" } } },
   "notificationsDisabledDesc": "All notifications are turned off",
+  "saveNotificationSettings": "Save Changes",
   "readingReminderNotifTitle": "Time to read!",
   "readingReminderNotifBody": "Your reading session starts soon. You got this!",
   "bookFinishedTitle": "You finished a book!",
@@ -567,6 +568,18 @@
   "guideBadgeContent": "Earn badges for reading achievements:\n\nReading Badges:\nFirst Page — Read your first page\nBookworm — Finish 10 books\nCentury Club — Finish 100 books\nSpeed Reader — Finish a book in under 3 days\nGenre Explorer — Read 5 different genres\n\nStreak Badges:\nOn Fire (7 days), Unstoppable (30 days), Legend (100 days), Immortal (365 days)\n\nSpecial Badges:\nReadBrain Certified — Quiz score 70%+\nDiamond League — Reach Diamond tier\nPaige's Best Friend — Buddy reaches Lv 25\nTop Dog — Buddy reaches Lv 50\n\nAll badges can be shared as BookTok/Instagram-ready cards!",
   "guideFocusTitle": "Focus Mode",
   "guideFocusContent": "Stay focused while reading with our timer!\n\nModes:\nFree Timer — Open-ended reading session\nPomodoro — 25 min reading + 5 min break\nGoal-based — Read until you reach X pages\n\nBuddy Care Rewards:\nUnder 15 min — Snack\n15-29 min — Walk\n30-59 min — Play\n60+ min — Feast\n\nYour screen stays on during focus sessions so you can track your reading time easily.",
+
+  "guideChallengeTitle": "Challenges",
+  "guideChallengeContent": "Compete with other readers in timed challenges!\n\nChallenge Types:\nRead-Along — Read the same book together\nSprint — Who reads the most pages this week?\nGenre — Finish 3 sci-fi books this month\nPages Goal — Read 1,000 pages in 30 days\n\nEach challenge has up to 30 participants with a live leaderboard.\n\nXP Rewards:\n+50 XP for joining\n+150 XP for completing\n+300 XP for finishing in Top 3\n\nYou'll get smart reminders before challenges end and at the halfway point.\n\nYou can turn challenge notifications on or off in Notification Settings.",
+
+  "guideReadBrainTitle": "ReadBrain AI Quiz",
+  "guideReadBrainContent": "Test your understanding after finishing a book!\n\nAI generates 5 multiple-choice questions based on the book you've read. Each question has 4 options with a brief explanation.\n\nScore 70% or higher to earn the ReadBrain Certified badge and +100 XP.\n\nYou get 3 attempts per book, then a 24-hour cooldown.\n\nPowered by Gemini AI — questions are unique and tailored to each book.",
+
+  "guideAiScannerTitle": "AI Book Scanner",
+  "guideAiScannerContent": "Add books instantly by scanning the cover with your camera!\n\nJust tap the camera icon on the Add Book screen, take a photo of any book cover, and AI will automatically extract the title, author, and page count.\n\nPowered by Gemini AI with Groq as a smart fallback — works even when one service is temporarily unavailable.",
+
+  "guideCalmModeTitle": "Calm Mode",
+  "guideCalmModeContent": "Want to read without the pressure of XP, streaks, and competition?\n\nCalm Mode lets you track your reading in peace. While active:\n\n• Reading won't earn XP\n• Your streak won't update\n• Leagues and challenges are paused\n• You'll be removed from active challenges\n\nYour reading data is still tracked — you just won't see gamification elements. Toggle it anytime from your profile.\n\nPerfect for vacation reading or when you just want to enjoy a book without thinking about stats.",
 
   "challengeLastDayTitle": "Challenge ends tomorrow!",
   "challengeLastDayBody": "\"{title}\" ends tomorrow. Keep reading to climb the ranks!",
@@ -900,6 +913,8 @@
   "swipeToStartReading": "Swipe right to start reading",
 
   "scanBookCover": "Scan Book Cover",
+  "scanningBookCover": "Analyzing book cover...",
+  "scanningBookCoverDesc": "AI is reading the cover, hang tight!",
   "bookCoverNotDetected": "Book not detected. Please check and try again.",
   "bookCoverScanError": "Could not scan the book cover. Please try again.",
   "addCoverPhoto": "Add Cover Photo (Optional)",

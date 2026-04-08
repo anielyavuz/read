@@ -181,17 +181,25 @@ class HomeCubit extends Cubit<HomeState> {
   }) async {
     try {
       final challenges = state.myChallenges;
+
+      // Check if user has challenge notifications enabled
+      final prefs = await _notificationPreferencesService.getPreferences();
+      final shouldSchedule =
+          prefs.enabled && prefs.challengeNotifications;
+
       for (final challenge in challenges) {
-        // Cancel old (possibly wrong-language) notifications
+        // Always cancel old notifications first
         await _challengeNotificationService.cancelForChallenge(challenge.id);
-        // Re-schedule with current locale
-        await _challengeNotificationService.scheduleForChallenge(
-          challenge: challenge,
-          lastDayTitle: lastDayTitle,
-          lastDayBody: lastDayBodyBuilder(challenge),
-          midPointTitle: midPointTitle,
-          midPointBody: midPointBodyBuilder(challenge),
-        );
+        // Only re-schedule if preference allows
+        if (shouldSchedule) {
+          await _challengeNotificationService.scheduleForChallenge(
+            challenge: challenge,
+            lastDayTitle: lastDayTitle,
+            lastDayBody: lastDayBodyBuilder(challenge),
+            midPointTitle: midPointTitle,
+            midPointBody: midPointBodyBuilder(challenge),
+          );
+        }
       }
     } catch (_) {
       // Non-critical

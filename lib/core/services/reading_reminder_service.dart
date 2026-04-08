@@ -60,6 +60,9 @@ class ReadingReminderService {
     }
   }
 
+  // One-shot notification ID for immediate "today" reminder
+  static const _immediateTodayId = 1010;
+
   /// Schedules reading reminder notifications based on user preferences.
   /// Cancels all existing reminders first, then schedules new ones.
   ///
@@ -81,6 +84,10 @@ class ReadingReminderService {
       return;
     }
 
+    final now = DateTime.now();
+    final isWeekday =
+        now.weekday >= DateTime.monday && now.weekday <= DateTime.friday;
+
     // Schedule weekday reminders (Monday–Friday, days 1-5)
     final weekdayTime = _parseTime(prefs.weekdayTime);
     if (weekdayTime != null) {
@@ -99,6 +106,18 @@ class ReadingReminderService {
         dev.log(
           'Scheduled weekday reminders at ${reminderTime.$1}:${reminderTime.$2.toString().padLeft(2, '0')}',
           name: 'ReadingReminderService',
+        );
+      }
+
+      // If today is a weekday and the -10min time already passed but reading
+      // time itself hasn't, fire a one-shot reminder in ~30 seconds so the
+      // user sees an immediate effect.
+      if (isWeekday) {
+        await _scheduleTodayIfNeeded(
+          readingTime: weekdayTime,
+          title: title,
+          body: body,
+          now: now,
         );
       }
     }
@@ -123,6 +142,58 @@ class ReadingReminderService {
           name: 'ReadingReminderService',
         );
       }
+
+      // Same one-shot logic for weekends
+      if (!isWeekday) {
+        await _scheduleTodayIfNeeded(
+          readingTime: weekendTime,
+          title: title,
+          body: body,
+          now: now,
+        );
+      }
+    }
+  }
+
+  /// If the reading time is in the near future (within 10 minutes) but the
+  /// standard -10 min reminder has already passed, schedule a one-shot
+  /// notification 30 seconds from now so the user gets immediate feedback.
+  Future<void> _scheduleTodayIfNeeded({
+    required (int, int) readingTime,
+    required String title,
+    required String body,
+    required DateTime now,
+  }) async {
+    final readingDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      readingTime.$1,
+      readingTime.$2,
+    );
+    final reminderTime = _subtractMinutes(readingTime, 10);
+    final reminderDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      reminderTime.$1,
+      reminderTime.$2,
+    );
+
+    // The standard -10min reminder is in the past, but reading time hasn't
+    // passed yet → fire a one-shot in 30 seconds.
+    if (reminderDateTime.isBefore(now) && readingDateTime.isAfter(now)) {
+      final fireAt = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 30));
+      await _scheduleOneShot(
+        id: _immediateTodayId,
+        title: title,
+        body: body,
+        scheduledDate: fireAt,
+      );
+      dev.log(
+        'Scheduled immediate today reminder at ${fireAt.hour}:${fireAt.minute.toString().padLeft(2, '0')}:${fireAt.second.toString().padLeft(2, '0')}',
+        name: 'ReadingReminderService',
+      );
     }
   }
 
@@ -137,6 +208,8 @@ class ReadingReminderService {
     for (int i = 0; i < 2; i++) {
       await _plugin.cancel(_baseWeekendId + i);
     }
+    // Cancel one-shot today reminder
+    await _plugin.cancel(_immediateTodayId);
   }
 
   Future<void> _scheduleWeekly({
@@ -181,6 +254,46 @@ class ReadingReminderService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+    );
+  }
+
+  /// Schedules a one-shot (non-recurring) notification at [scheduledDate].
+  Future<void> _scheduleOneShot({
+    required int id,
+    required String title,
+    required String body,
+    required tz.TZDateTime scheduledDate,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      channelDescription: 'Daily reading time reminders',
+      importance: Importance.high,
+      priority: Priority.high,
+      category: AndroidNotificationCategory.reminder,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      interruptionLevel: InterruptionLevel.timeSensitive,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _plugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
