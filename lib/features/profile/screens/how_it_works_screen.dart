@@ -148,7 +148,8 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
           children: [
             Row(
               children: [
-                widget.iconWidget ?? Icon(widget.icon, color: widget.iconColor, size: 24),
+                widget.iconWidget ??
+                    Icon(widget.icon, color: widget.iconColor, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
