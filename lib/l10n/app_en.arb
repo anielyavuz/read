@@ -184,6 +184,7 @@
   "authorName": "Author Name",
   "pageCountLabel": "Page Count",
   "addStatus": "Add as",
+  "currentPageQuestion": "Which page are you on?",
   "bookAdded": "Book added!",
   "pleaseEnterTitle": "Please enter a title",
   "pleaseEnterAuthor": "Please enter an author",

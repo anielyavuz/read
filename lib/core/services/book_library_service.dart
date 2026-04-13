@@ -24,6 +24,7 @@ class BookLibraryService {
   Future<void> addBookToLibrary({
     required Book book,
     required String status,
+    int? currentPage,
   }) async {
     if (_uid == null) return;
 
@@ -35,7 +36,7 @@ class BookLibraryService {
     final userBook = UserBook(
       bookId: book.id,
       status: status,
-      currentPage: isFinished ? book.pageCount : 0,
+      currentPage: isFinished ? book.pageCount : (currentPage ?? 0),
       totalPages: book.pageCount,
       startDate: status == 'reading' ? DateTime.now() : null,
       finishDate: isFinished ? DateTime.now() : null,

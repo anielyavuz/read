@@ -17,6 +17,7 @@ import '../../features/shell/screens/shell_screen.dart';
 import '../../features/home/screens/home_tab.dart';
 import '../../features/library/screens/library_tab.dart';
 import '../../features/library/screens/book_search_screen.dart';
+import '../../features/library/screens/book_manual_add_screen.dart';
 import '../../features/library/screens/book_detail_screen.dart';
 import '../../features/focus/screens/focus_tab.dart';
 import '../../features/discover/screens/discover_tab.dart';
@@ -149,7 +150,31 @@ class AppRouter {
       // Non-shell routes
       GoRoute(
         path: '/book-search',
-        builder: (context, state) => const BookSearchScreen(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const BookSearchScreen(),
+          transitionDuration: const Duration(milliseconds: 200),
+          reverseTransitionDuration: const Duration(milliseconds: 150),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.05),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut,
+              )),
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: '/book-manual-add',
+        builder: (context, state) => const BookManualAddScreen(),
       ),
       GoRoute(
         path: '/book/:bookId',

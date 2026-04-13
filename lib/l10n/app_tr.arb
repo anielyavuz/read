@@ -177,6 +177,7 @@
   "authorName": "Yazar Adı",
   "pageCountLabel": "Sayfa Sayısı",
   "addStatus": "Olarak ekle",
+  "currentPageQuestion": "Kaçıncı sayfadasın?",
   "bookAdded": "Kitap eklendi!",
   "pleaseEnterTitle": "Lütfen bir başlık girin",
   "pleaseEnterAuthor": "Lütfen bir yazar girin",

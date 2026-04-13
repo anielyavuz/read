@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/book_library_service.dart';
 import '../../../core/services/google_books_service.dart';
@@ -10,6 +8,7 @@ import '../../../core/services/system_info_service.dart';
 import '../../../core/services/service_locator.dart';
 import '../cubit/book_search_cubit.dart';
 import '../cubit/book_search_state.dart';
+import '../widgets/search_result_card.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
 class BookSearchScreen extends StatelessWidget {
@@ -23,262 +22,44 @@ class BookSearchScreen extends StatelessWidget {
         libraryService: getIt<BookLibraryService>(),
         systemInfoService: getIt<SystemInfoService>(),
       ),
-      child: const _BookAddContent(),
+      child: const _BookSearchContent(),
     );
   }
 }
 
-class _BookAddContent extends StatefulWidget {
-  const _BookAddContent();
+class _BookSearchContent extends StatefulWidget {
+  const _BookSearchContent();
 
   @override
-  State<_BookAddContent> createState() => _BookAddContentState();
+  State<_BookSearchContent> createState() => _BookSearchContentState();
 }
 
-class _BookAddContentState extends State<_BookAddContent> {
-  final _titleCtrl = TextEditingController();
-  final _authorCtrl = TextEditingController();
-  final _pageCtrl = TextEditingController();
-  String _selectedStatus = 'reading';
-  String? _coverBase64;
-  bool _isScanning = false;
-  bool _isSaving = false;
+class _BookSearchContentState extends State<_BookSearchContent> {
+  final _searchCtrl = TextEditingController();
+  final _focusNode = FocusNode();
 
   @override
-  void dispose() {
-    _titleCtrl.dispose();
-    _authorCtrl.dispose();
-    _pageCtrl.dispose();
-    super.dispose();
-  }
-
-  bool get _canSubmit =>
-      _titleCtrl.text.trim().isNotEmpty &&
-      (int.tryParse(_pageCtrl.text.trim()) ?? 0) > 0 &&
-      !_isSaving;
-
-  Future<void> _pickCoverImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(
-      source: source,
-      imageQuality: 70,
-      maxWidth: 400,
-      maxHeight: 600,
-    );
-    if (image == null) return;
-
-    final bytes = await File(image.path).readAsBytes();
-    setState(() {
-      _coverBase64 = base64Encode(bytes);
+  void initState() {
+    super.initState();
+    // Auto-focus search field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
     });
   }
 
-  void _showCoverOptions() {
-    final l10n = AppLocalizations.of(context)!;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.surfaceDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt_rounded,
-                  color: AppColors.primary),
-              title: Text(l10n.scanBookCover,
-                  style: const TextStyle(color: AppColors.textPrimary)),
-              onTap: () {
-                Navigator.pop(ctx);
-                _pickCoverImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_rounded,
-                  color: AppColors.primary),
-              title: Text(l10n.changeCoverPhoto,
-                  style: const TextStyle(color: AppColors.textPrimary)),
-              onTap: () {
-                Navigator.pop(ctx);
-                _pickCoverImage(ImageSource.gallery);
-              },
-            ),
-            if (_coverBase64 != null)
-              ListTile(
-                leading: const Icon(Icons.delete_outline_rounded,
-                    color: AppColors.error),
-                title: Text(l10n.removeCustomCover,
-                    style: const TextStyle(color: AppColors.error)),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  setState(() => _coverBase64 = null);
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleCameraScan() async {
-    final cubit = context.read<BookSearchCubit>();
-    final l10n = AppLocalizations.of(context)!;
-    final picker = ImagePicker();
-    final photo = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
-    if (photo == null) return;
-
-    setState(() => _isScanning = true);
-
-    await cubit.scanBookCover(photo.path);
-
-    final scanStatus = cubit.state.coverScanStatus;
-    final scanResult = cubit.state.coverScanResult;
-
-    if (scanStatus == CoverScanStatus.success && scanResult != null) {
-      if (scanResult.title != null && scanResult.title!.isNotEmpty) {
-        _titleCtrl.text = scanResult.title!;
-      }
-      if (scanResult.author != null && scanResult.author!.isNotEmpty) {
-        _authorCtrl.text = scanResult.author!;
-      }
-      if (scanResult.pageCount != null && scanResult.pageCount! > 0) {
-        _pageCtrl.text = scanResult.pageCount.toString();
-      }
-    } else if (scanStatus == CoverScanStatus.notABook) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.bookCoverNotDetected),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.bookCoverScanError),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
-
-    cubit.resetCoverScan();
-    setState(() => _isScanning = false);
-  }
-
-  Future<void> _submit() async {
-    if (!_canSubmit) return;
-
-    setState(() => _isSaving = true);
-
-    final cubit = context.read<BookSearchCubit>();
-    final title = _titleCtrl.text.trim();
-    final author = _authorCtrl.text.trim();
-    final pages = int.tryParse(_pageCtrl.text.trim()) ?? 0;
-    final l10n = AppLocalizations.of(context)!;
-
-    final book = await cubit.addManualBook(
-      title: title,
-      author: author.isNotEmpty ? author : 'Unknown',
-      pageCount: pages,
-      status: _selectedStatus,
-    );
-
-    if (book != null && _coverBase64 != null) {
-      // Save custom cover after book is added
-      await getIt<BookLibraryService>().updateCustomCover(
-        bookId: book.id,
-        base64Image: _coverBase64,
-      );
-    }
-
-    setState(() => _isSaving = false);
-
-    if (book != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.bookAdded),
-          backgroundColor: AppColors.primary,
-        ),
-      );
-      Navigator.pop(context);
-    }
-  }
-
-  Widget _buildField(
-    TextEditingController ctrl,
-    String hint, {
-    TextInputType? keyboardType,
-  }) {
-    return TextField(
-      controller: ctrl,
-      keyboardType: keyboardType,
-      onChanged: (_) => setState(() {}),
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
-        filled: true,
-        fillColor: AppColors.surfaceDark,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 1.5,
-          ),
-        ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    );
-  }
-
-  Widget _statusChip(String label, String value) {
-    final isSelected = value == _selectedStatus;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedStatus = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.15)
-              : AppColors.surfaceDark,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? AppColors.primary : AppColors.textMuted,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Stack(
-      children: [
-        Scaffold(
+    return Scaffold(
+      backgroundColor: AppColors.backgroundDark,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundDark,
         surfaceTintColor: Colors.transparent,
@@ -287,235 +68,272 @@ class _BookAddContentState extends State<_BookAddContent> {
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
         ),
         title: Text(
-          l10n.addBookManually,
+          l10n.searchBooks,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: _isScanning ? null : _handleCameraScan,
-            tooltip: l10n.scanBookCover,
-            icon: const Icon(
-              Icons.camera_alt_rounded,
-              color: AppColors.primary,
-              size: 22,
+      ),
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchCtrl,
+              focusNode: _focusNode,
+              onChanged: (query) {
+                context.read<BookSearchCubit>().search(query);
+              },
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+              ),
+              decoration: InputDecoration(
+                hintText: l10n.searchHint,
+                hintStyle: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 14,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.textMuted,
+                  size: 22,
+                ),
+                suffixIcon: _searchCtrl.text.isNotEmpty
+                    ? IconButton(
+                        onPressed: () {
+                          _searchCtrl.clear();
+                          context.read<BookSearchCubit>().clearSearch();
+                          setState(() {});
+                        },
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textMuted,
+                          size: 20,
+                        ),
+                      )
+                    : null,
+                filled: true,
+                fillColor: AppColors.surfaceDark,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 1.5,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
+          ),
+
+          // Results
+          Expanded(
+            child: BlocBuilder<BookSearchCubit, BookSearchState>(
+              builder: (context, state) {
+                return Column(
+                  children: [
+                    Expanded(child: _buildResultsArea(context, state, l10n)),
+                    // Fixed "Add Manually" button at bottom
+                    _buildManualAddButton(context, l10n),
+                  ],
+                );
+              },
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Cover photo (optional)
-            Center(
-              child: GestureDetector(
-                onTap: _showCoverOptions,
-                child: _coverBase64 != null
-                    ? Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.memory(
-                              base64Decode(_coverBase64!),
-                              width: 100,
-                              height: 150,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.tapToChangeCover,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(
-                        width: 100,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceDark,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.textMuted.withValues(alpha: 0.3),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.add_photo_alternate_rounded,
-                              color: AppColors.textMuted,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              l10n.addCoverPhoto,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: AppColors.textMuted,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 24),
+    );
+  }
 
-            // Book title (required)
-            Text(
-              '${l10n.bookTitle} *',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildField(_titleCtrl, l10n.bookTitle),
-            const SizedBox(height: 16),
-
-            // Author (optional)
-            Text(
-              l10n.authorName,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildField(_authorCtrl, l10n.authorName),
-            const SizedBox(height: 16),
-
-            // Page count (required)
-            Text(
-              '${l10n.pageCountLabel} *',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildField(
-              _pageCtrl,
-              l10n.pageCountLabel,
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-
-            // Status selector
-            Text(
-              l10n.addStatus,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+  Widget _buildResultsArea(
+    BuildContext context,
+    BookSearchState state,
+    AppLocalizations l10n,
+  ) {
+    switch (state.status) {
+      case SearchStatus.initial:
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _statusChip(l10n.currentlyReading, 'reading'),
-                _statusChip(l10n.wantToRead, 'tbr'),
-                _statusChip(l10n.finished, 'finished'),
+                Icon(
+                  Icons.search_rounded,
+                  size: 64,
+                  color: AppColors.textMuted.withValues(alpha: 0.4),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.searchHint,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 32),
+          ),
+        );
 
-            // Submit button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: _canSubmit ? _submit : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor:
-                      AppColors.primary.withValues(alpha: 0.3),
-                  disabledForegroundColor:
-                      AppColors.textMuted.withValues(alpha: 0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+      case SearchStatus.searching:
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
+
+      case SearchStatus.loaded:
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
+          itemCount: state.results.length,
+          itemBuilder: (context, index) {
+            final book = state.results[index];
+            return SearchResultCard(
+              book: book,
+              onAdd: (book, status, {int? currentPage}) {
+                context.read<BookSearchCubit>().addToLibrary(book, status, currentPage: currentPage);
+              },
+            );
+          },
+        );
+
+      case SearchStatus.empty:
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  size: 56,
+                  color: AppColors.textMuted.withValues(alpha: 0.4),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.noResults,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary,
                   ),
-                  elevation: 0,
                 ),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(
-                        l10n.addToLibrary,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-        // Full-screen scanning overlay
-        if (_isScanning)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.7),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      l10n.scanningBookCover,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.scanningBookCoverDesc,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
-      ],
+        );
+
+      case SearchStatus.error:
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 48,
+                color: AppColors.textMuted,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.somethingWentWrong,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        );
+    }
+  }
+
+  Widget _buildManualAddButton(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.backgroundDark,
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withValues(alpha: 0.06),
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: SafeArea(
+        top: false,
+        child: InkWell(
+          onTap: () async {
+            await context.push('/book-manual-add');
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceDark,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.edit_note_rounded,
+                    color: AppColors.primary,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.cantFindBook,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.addManually,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textMuted,
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

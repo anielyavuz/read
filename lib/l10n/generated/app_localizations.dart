@@ -1058,6 +1058,12 @@ abstract class AppLocalizations {
   /// **'Add as'**
   String get addStatus;
 
+  /// No description provided for @currentPageQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which page are you on?'**
+  String get currentPageQuestion;
+
   /// No description provided for @bookAdded.
   ///
   /// In en, this message translates to:

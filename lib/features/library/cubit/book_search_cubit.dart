@@ -37,7 +37,7 @@ class BookSearchCubit extends Cubit<BookSearchState> {
 
     emit(state.copyWith(query: query, status: SearchStatus.searching));
 
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+    _debounceTimer = Timer(const Duration(milliseconds: 1500), () async {
       try {
         final results = await _googleBooksService.searchBooks(query);
         RemoteLoggerService.book('Book search',
@@ -65,9 +65,9 @@ class BookSearchCubit extends Cubit<BookSearchState> {
     });
   }
 
-  Future<void> addToLibrary(Book book, String status) async {
+  Future<void> addToLibrary(Book book, String status, {int? currentPage}) async {
     try {
-      await _libraryService.addBookToLibrary(book: book, status: status);
+      await _libraryService.addBookToLibrary(book: book, status: status, currentPage: currentPage);
       RemoteLoggerService.book('Book added to library',
         bookId: book.id, bookTitle: book.title,
         screen: 'book_search',

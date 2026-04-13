@@ -529,6 +529,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addStatus => 'Add as';
 
   @override
+  String get currentPageQuestion => 'Which page are you on?';
+
+  @override
   String get bookAdded => 'Book added!';
 
   @override

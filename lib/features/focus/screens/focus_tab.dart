@@ -132,6 +132,16 @@ class FocusTab extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (state.selectedBookCurrentPage > 0)
+                        Center(
+                          child: Text(
+                            l10n.continuingFromPage(state.selectedBookCurrentPage),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       // Notes button
                       if (state.selectedBookId != null)

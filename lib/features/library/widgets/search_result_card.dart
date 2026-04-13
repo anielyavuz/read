@@ -6,7 +6,7 @@ import '../../../l10n/generated/app_localizations.dart';
 
 class SearchResultCard extends StatelessWidget {
   final Book book;
-  final void Function(Book book, String status) onAdd;
+  final void Function(Book book, String status, {int? currentPage}) onAdd;
 
   const SearchResultCard({
     super.key,
@@ -123,81 +123,221 @@ class SearchResultCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surfaceDark,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.textMuted,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.addToLibrary,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  leading: const Icon(
-                    Icons.menu_book_rounded,
-                    color: AppColors.primary,
-                  ),
-                  title: Text(
-                    l10n.currentlyReading,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    onAdd(book, 'reading');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.bookAdded),
-                        backgroundColor: AppColors.primary,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.bookmark_outline,
-                    color: AppColors.amber,
-                  ),
-                  title: Text(
-                    l10n.wantToRead,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    onAdd(book, 'tbr');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.bookAdded),
-                        backgroundColor: AppColors.primary,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
+        return _StatusPickerSheet(
+          book: book,
+          onAdd: onAdd,
+          l10n: l10n,
         );
       },
+    );
+  }
+}
+
+class _StatusPickerSheet extends StatefulWidget {
+  final Book book;
+  final void Function(Book book, String status, {int? currentPage}) onAdd;
+  final AppLocalizations l10n;
+
+  const _StatusPickerSheet({
+    required this.book,
+    required this.onAdd,
+    required this.l10n,
+  });
+
+  @override
+  State<_StatusPickerSheet> createState() => _StatusPickerSheetState();
+}
+
+class _StatusPickerSheetState extends State<_StatusPickerSheet> {
+  bool _showPageInput = false;
+  final _pageCtrl = TextEditingController(text: '1');
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _confirmReading() {
+    final page = int.tryParse(_pageCtrl.text.trim()) ?? 1;
+    final clampedPage = page.clamp(1, widget.book.pageCount > 0 ? widget.book.pageCount : 99999);
+    Navigator.pop(context);
+    widget.onAdd(widget.book, 'reading', currentPage: clampedPage);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(widget.l10n.bookAdded),
+        backgroundColor: AppColors.primary,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: 16,
+          left: 0,
+          right: 0,
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.textMuted,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.l10n.addToLibrary,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            if (!_showPageInput) ...[
+              // Currently Reading
+              ListTile(
+                leading: const Icon(
+                  Icons.menu_book_rounded,
+                  color: AppColors.primary,
+                ),
+                title: Text(
+                  widget.l10n.currentlyReading,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                ),
+                onTap: () {
+                  setState(() => _showPageInput = true);
+                },
+              ),
+              // Want to Read
+              ListTile(
+                leading: const Icon(
+                  Icons.bookmark_outline,
+                  color: AppColors.amber,
+                ),
+                title: Text(
+                  widget.l10n.wantToRead,
+                  style: const TextStyle(color: AppColors.textPrimary),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onAdd(widget.book, 'tbr');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(widget.l10n.bookAdded),
+                      backgroundColor: AppColors.primary,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ],
+
+            // Page input for "Currently Reading"
+            if (_showPageInput) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.l10n.currentPageQuestion,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 120,
+                      child: TextField(
+                        controller: _pageCtrl,
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        autofocus: true,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: AppColors.backgroundDark,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          suffixText: widget.book.pageCount > 0
+                              ? '/ ${widget.book.pageCount}'
+                              : null,
+                          suffixStyle: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 14,
+                          ),
+                        ),
+                        onSubmitted: (_) => _confirmReading(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _confirmReading,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          widget.l10n.addToLibrary,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
     );
   }
 }

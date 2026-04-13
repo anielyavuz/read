@@ -35,17 +35,22 @@ class GoogleBooksService {
     final apiKey = await _getApiKey();
     final trimmed = query.trim();
 
-    // Step 1: Search Google Books and Open Library in parallel
+    // Step 1: Search Google Books (general + title-specific) and Open Library in parallel
+    // General query searches across title, author, description — critical for Turkish books
+    // Title-specific query ensures exact title matches rank high
     final responses = await Future.wait([
+      _executeGoogleSearch(trimmed, apiKey, maxResults),
       _executeGoogleSearch('intitle:$trimmed', apiKey, maxResults),
       _searchOpenLibrary(trimmed, maxResults),
     ]);
 
-    final googleResults = responses[0];
-    final openLibResults = responses[1];
+    final googleGeneralResults = responses[0];
+    final googleTitleResults = responses[1];
+    final openLibResults = responses[2];
 
-    // Merge: Google Books first (better covers/metadata), then unique Open Library results
-    final merged = _mergeResults(googleResults, openLibResults);
+    // Merge: general first (better Turkish character handling), then title-specific, then Open Library
+    final googleMerged = _mergeResults(googleGeneralResults, googleTitleResults);
+    final merged = _mergeResults(googleMerged, openLibResults);
     if (merged.isNotEmpty) return merged;
 
     // Step 2: Search community catalog in Firestore

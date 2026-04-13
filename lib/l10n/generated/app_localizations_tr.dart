@@ -527,6 +527,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addStatus => 'Olarak ekle';
 
   @override
+  String get currentPageQuestion => 'Kaçıncı sayfadasın?';
+
+  @override
   String get bookAdded => 'Kitap eklendi!';
 
   @override
